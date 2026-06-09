@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DLGI — Consulta de Notas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f4f4f6;color:#1a1a1a;min-height:100vh;}
+.site-header{background:#5454e9;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.site-header img{height:26px;}
+.header-label{color:rgba(255,255,255,0.65);font-size:13px;}
+.container{max-width:680px;margin:0 auto;padding:36px 20px 60px;}
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 64px);padding-bottom:80px;}
+.login-card{background:#fff;border:0.5px solid #d8d8e0;border-radius:16px;padding:2rem 2rem 1.75rem;width:100%;max-width:380px;box-shadow:0 2px 20px rgba(84,84,233,0.08);}
+.login-card .eyebrow{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#5454e9;margin-bottom:6px;}
+.login-card h2{font-size:22px;font-weight:700;margin-bottom:4px;}
+.login-card p{font-size:14px;color:#666;margin-bottom:20px;line-height:1.55;}
+.input-row{display:flex;gap:8px;}
+.input-row input{flex:1;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.15s;}
+.input-row input:focus{border-color:#5454e9;box-shadow:0 0 0 3px rgba(84,84,233,0.1);}
+.input-row input::placeholder{color:#bbb;}
+.btn-primary{background:#5454e9;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+.btn-primary:hover{background:#3f3fd4;}
+.error-msg{font-size:13px;color:#c0392b;margin-top:8px;display:none;}
+.grade-banner{background:#5454e9;border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.grade-banner-left .course{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:4px;}
+.grade-banner-left .name{font-size:17px;font-weight:700;color:#fff;}
+.grade-right{text-align:right;}
+.grade-right .glabel{font-size:11px;color:rgba(255,255,255,0.6);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;}
+.grade-right .gvalue{font-size:38px;font-weight:800;color:#e4eb60;line-height:1;}
+.grade-right .gdenom{font-size:16px;font-weight:400;color:rgba(255,255,255,0.45);}
+.tabs{display:flex;border-bottom:1.5px solid #e0e0ea;margin-bottom:24px;}
+.tab-btn{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-1.5px;padding:10px 22px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;color:#999;cursor:pointer;transition:color 0.15s,border-color 0.15s;}
+.tab-btn.active{color:#5454e9;border-bottom-color:#5454e9;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.section-label{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:12px;}
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+.score-card{background:#fff;border:0.5px solid #e0e0ea;border-radius:12px;padding:14px 16px;}
+.score-card .sc-label{font-size:12px;color:#999;margin-bottom:6px;}
+.score-card .sc-value{font-size:28px;font-weight:800;color:#1a1a1a;line-height:1;}
+.score-card .sc-weight{font-size:11px;color:#ccc;margin-top:4px;}
+.score-card.total{grid-column:1/-1;background:#f0f0fd;border-color:#c8c8f5;}
+.score-card.total .sc-label{color:#5454e9;font-weight:700;}
+.score-card.total .sc-value{color:#5454e9;font-size:32px;}
+.fb-block{border-radius:0 12px 12px 0;padding:16px 18px;margin-bottom:10px;}
+.fb-block.logros{background:#edf7f0;border-left:3px solid #27ae60;}
+.fb-block.mejora{background:#fef9ec;border-left:3px solid #e6a817;}
+.fb-title{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+.fb-block.logros .fb-title{color:#1a7a40;}
+.fb-block.mejora .fb-title{color:#9a6c0a;}
+.fb-block p{font-size:14px;line-height:1.65;color:#2a2a2a;}
+.video-link{display:flex;align-items:center;gap:12px;text-decoration:none;background:#fff;border:0.5px solid #e0e0ea;border-radius:12px;padding:14px 18px;margin-top:16px;color:#5454e9;font-size:14px;font-weight:600;transition:background 0.15s;}
+.video-link:hover{background:#f0f0fd;}
+.play-icon{width:38px;height:38px;background:#5454e9;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.play-icon svg{fill:#fff;width:13px;height:13px;margin-left:3px;}
+.vl-label{display:block;font-size:11px;color:#aaa;font-weight:400;margin-bottom:1px;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FwYV8xIiBkYXRhLW5hbWU9IkNhcGEgMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1NjAgMjg4Ij4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjNTQ1NGU5OwogICAgICB9CgogICAgICAuY2xzLTEsIC5jbHMtMiB7CiAgICAgICAgc3Ryb2tlLXdpZHRoOiAwcHg7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPHJlY3QgY2xhc3M9ImNscy0xIiB3aWR0aD0iNTYwIiBoZWlnaHQ9IjI4OCIvPgogIDxnPgogICAgPGc+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE3OS42LDcxLjFjMS43LDEuMiwzLjQsMi40LDUsMy42bC0xMy45LDE5LjJjLTEuNi0xLjMtMy4zLTIuNS01LTMuNmwxMy45LTE5LjJaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTc5LjYsNzEuMWMxLjcsMS4yLDMuNCwyLjQsNSwzLjZsLTEzLjksMTkuMmMtMS42LTEuMy0zLjMtMi41LTUtMy42bDEzLjktMTkuMloiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik05Ni4xLDYzLjJsNy40LDIyLjZjNC43LTIuMiw5LjYtMy44LDE0LjgtNC44bC03LjQtMjIuNmMtNS4xLDEuMi0xMC4xLDIuOC0xNC44LDQuOFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik05Ni4xLDYzLjJsNy40LDIyLjZjNC43LTIuMiw5LjYtMy44LDE0LjgtNC44bC03LjQtMjIuNmMtNS4xLDEuMi0xMC4xLDIuOC0xNC44LDQuOFoiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xNDcuNyw4Mi4xYzEuOC41LDMuNiwxLjEsNS4zLDEuN2w3LjMtMjIuNWMtMS43LS42LTMuNS0xLjItNS4zLTEuN2wtNy4zLDIyLjVaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTQ3LjcsODIuMWMxLjguNSwzLjYsMS4xLDUuMywxLjdsNy4zLTIyLjVjLTEuNy0uNi0zLjUtMS4yLTUuMy0xLjdsLTcuMywyMi41WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTc0LjgsMTEyLjJjMi4zLTQuMSw1LjEtNy45LDguMy0xMS40bC0xOS4yLTE0Yy0zLjEsMy42LTUuOCw3LjQtOC4zLDExLjRsMTkuMiwxNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik03NC44LDExMi4yYzIuMy00LjEsNS4xLTcuOSw4LjMtMTEuNGwtMTkuMi0xNGMtMy4xLDMuNi01LjgsNy40LTguMywxMS40bDE5LjIsMTRaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNODcuMSw5Ni44YzMuNi0zLjMsNy43LTYuMywxMi04LjdsLTE0LTE5LjJjLTQuMiwyLjYtOC4zLDUuNS0xMiw4LjdsMTQsMTkuMloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik04Ny4xLDk2LjhjMy42LTMuMyw3LjctNi4zLDEyLTguN2wtMTQtMTkuMmMtNC4yLDIuNi04LjMsNS41LTEyLDguN2wxNCwxOS4yWiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTIxMi45LDExMy40bC0yMi41LDcuM2MuOSwyLjIsMS42LDQuNSwyLjIsNi45bDIyLjUtNy4zYy0uNy0yLjMtMS40LTQuNi0yLjItNi45WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTIxMi45LDExMy40bC0yMi41LDcuM2MuOSwyLjIsMS42LDQuNSwyLjIsNi45bDIyLjUtNy4zYy0uNy0yLjMtMS40LTQuNi0yLjItNi45WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTY2LjMsMTQ0YzAtMi4xLjEtNC4zLjMtNi40aC0yMy43Yy0uMiwyLjEtLjIsNC4yLS4yLDYuNHMwLDQuMy4yLDYuNGgyMy43Yy0uMi0yLjEtLjMtNC4yLS4zLTYuNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik02Ni4zLDE0NGMwLTIuMS4xLTQuMy4zLTYuNGgtMjMuN2MtLjIsMi4xLS4yLDQuMi0uMiw2LjRzMCw0LjMuMiw2LjRoMjMuN2MtLjItMi4xLS4zLTQuMi0uMy02LjRaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTk0LjgsMTQ0YzAsMS4zLDAsMi43LS4xLDRoMjMuN2MwLTEuMywwLTIuNywwLTRzMC0yLjcsMC00aC0yMy43YzAsMS4zLjEsMi43LjEsNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xOTQuOCwxNDRjMCwxLjMsMCwyLjctLjEsNGgyMy43YzAtMS4zLDAtMi43LDAtNHMwLTIuNywwLTRoLTIzLjdjMCwxLjMuMSwyLjcuMSw0WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTY3LjcsMTMwLjZjLjktNC40LDIuMy04LjcsNC4xLTEyLjdsLTIyLjYtNy4zYy0xLjcsNC4xLTMuMSw4LjMtNC4xLDEyLjdsMjIuNiw3LjNaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNjcuNywxMzAuNmMuOS00LjQsMi4zLTguNyw0LjEtMTIuN2wtMjIuNi03LjNjLTEuNyw0LjEtMy4xLDguMy00LjEsMTIuN2wyMi42LDcuM1oiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xODAuNCwxMDMuNmMxLjQsMS44LDIuOCwzLjYsNCw1LjZsMTkuMi0xMy45Yy0xLjMtMS45LTIuNi0zLjgtNC01LjZsLTE5LjIsMTMuOVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xODAuNCwxMDMuNmMxLjQsMS44LDIuOCwzLjYsNCw1LjZsMTkuMi0xMy45Yy0xLjMtMS45LTIuNi0zLjgtNC01LjZsLTE5LjIsMTMuOVoiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xMjIuMyw1Ni41djIzLjhzMCwwLDAsMGMxLjEtLjEsNC41LS41LDguMi0uNXM3LjEuNCw4LjIuNWMwLDAsMCwwLDAsMHYtMjMuOGMtMS4zLS4xLTQuNy0uNC04LjItLjRzLTYuOS4zLTguMi40WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTEyMi4zLDU2LjV2MjMuOHMwLDAsMCwwYzEuMS0uMSw0LjUtLjUsOC4yLS41czcuMS40LDguMi41YzAsMCwwLDAsMCwwdi0yMy44Yy0xLjMtLjEtNC43LS40LTguMi0uNHMtNi45LjMtOC4yLjRaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTcyLjQsMTkyLjZjLTIuNCwyLTQuOSwzLjktNy41LDUuNmwxNCwxOS4yYzIuNi0xLjcsNS4xLTMuNiw3LjUtNS42bC0xNC0xOS4yWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE3Mi40LDE5Mi42Yy0yLjQsMi00LjksMy45LTcuNSw1LjZsMTQsMTkuMmMyLjYtMS43LDUuMS0zLjYsNy41LTUuNmwtMTQtMTkuMloiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik03MS42LDE2OS41Yy0xLjYtMy43LTIuOC03LjUtMy43LTExLjVsLTIyLjYsNy4zYzEsMy45LDIuMiw3LjgsMy43LDExLjVsMjIuNi03LjNaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNzEuNiwxNjkuNWMtMS42LTMuNy0yLjgtNy41LTMuNy0xMS41bC0yMi42LDcuM2MxLDMuOSwyLjIsNy44LDMuNywxMS41bDIyLjYtNy4zWiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE1NC44LDIwMy41Yy0yLjksMS4yLTUuOCwyLjEtOC45LDIuOWw3LjMsMjIuNmMzLS44LDYtMS44LDguOS0yLjlsLTcuMy0yMi42WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE1NC44LDIwMy41Yy0yLjksMS4yLTUuOCwyLjEtOC45LDIuOWw3LjMsMjIuNmMzLS44LDYtMS44LDguOS0yLjlsLTcuMy0yMi42WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE5Mi44LDE1OS44Yy0uNywyLjctMS42LDUuNC0yLjYsOGwyMi42LDcuM2MxLTIuNiwxLjktNS4zLDIuNi04bC0yMi41LTcuM1oiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xOTIuOCwxNTkuOGMtLjcsMi43LTEuNiw1LjQtMi42LDhsMjIuNiw3LjNjMS0yLjYsMS45LTUuMywyLjYtOGwtMjIuNS03LjNaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTg1LDE3OGMtMS42LDIuNS0zLjMsNC45LTUuMiw3LjJsMTkuMiwxMy45YzEuOS0yLjMsMy42LTQuNyw1LjItNy4ybC0xOS4yLTEzLjlaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTg1LDE3OGMtMS42LDIuNS0zLjMsNC45LTUuMiw3LjJsMTkuMiwxMy45YzEuOS0yLjMsMy42LTQuNyw1LjItNy4ybC0xOS4yLTEzLjlaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNODMuNCwyMTguMmwxMy45LTE5LjJjLTMuMS0xLjktNi4xLTQtOC44LTYuNGwtMTQsMTkuMmMyLjgsMi4zLDUuNyw0LjUsOC44LDYuNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik04My40LDIxOC4ybDEzLjktMTkuMmMtMy4xLTEuOS02LjEtNC04LjgtNi40bC0xNCwxOS4yYzIuOCwyLjMsNS43LDQuNSw4LjgsNi40WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTgyLjIsMTg2LjJjLTIuNS0yLjktNC44LTYtNi44LTkuM2wtMTkuMiwxNGMyLDMuMiw0LjMsNi4zLDYuNyw5LjNsMTkuMi0xNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik04Mi4yLDE4Ni4yYy0yLjUtMi45LTQuOC02LTYuOC05LjNsLTE5LjIsMTRjMiwzLjIsNC4zLDYuMyw2LjcsOS4zbDE5LjItMTRaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTE1LjcsMjA2LjVjLTMuNC0uOC02LjctMS45LTkuOS0zLjJsLTcuMywyMi42YzMuMiwxLjMsNi41LDIuMyw5LjgsMy4ybDcuMy0yMi42WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTExNS43LDIwNi41Yy0zLjQtLjgtNi43LTEuOS05LjktMy4ybC03LjMsMjIuNmMzLjIsMS4zLDYuNSwyLjMsOS44LDMuMmw3LjMtMjIuNloiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xMzUuNSwyMzEuN3YtMjMuN2MtMS42LjEtMy4zLjItNC45LjJzLTMuMywwLTQuOS0uMnYyMy43YzEuNiwwLDMuMy4xLDQuOS4xczMuMywwLDQuOS0uMVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xMzUuNSwyMzEuN3YtMjMuN2MtMS42LjEtMy4zLjItNC45LjJzLTMuMywwLTQuOS0uMnYyMy43YzEuNiwwLDMuMy4xLDQuOS4xczMuMywwLDQuOS0uMVoiLz4KICAgICAgPC9nPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xMjAuMywxMDYuNWMtMS4yLjMtMi40LjctMy41LDEuMWwtNi42LTIwLjRjMS4yLS40LDIuMy0uOCwzLjUtMS4xbDYuNiwyMC40Wk0xMzAuNSw4My43Yy0xLjQsMC0yLjksMC00LjMuMnYyMS42YzEuNC0uMiwyLjgtLjIsNC4zLS4yLDEuNSwwLDIuOSwwLDQuMy4ydi0yMS42Yy0xLjQsMC0yLjgtLjItNC4zLS4yWk0xNTMuMSw4OGMtMi42LTEtNS4yLTEuOS03LjktMi42bC02LjcsMjAuNWMyLjguNiw1LjQsMS41LDcuOSwyLjZsNi43LTIwLjVaTTE2OS4yLDk3LjdjLTIuMS0xLjctNC4yLTMuMy02LjUtNC43bC0xMi43LDE3LjRjMi4zLDEuNCw0LjUsMi45LDYuNSw0LjdsMTIuNy0xNy40Wk05Ni43LDk0Yy0xLjEuNy0yLjEsMS41LTMuMiwyLjNsMTIuNiwxNy40YzEtLjgsMi4xLTEuNiwzLjItMi4zbC0xMi42LTE3LjRaTTE4MS41LDExMS44Yy0xLjQtMi4yLTIuOS00LjMtNC42LTYuM2wtMTcuNCwxMi43YzEuNywxLjksMy4zLDQuMSw0LjYsNi4zbDE3LjQtMTIuN1pNNzIuNSwxMjcuNWwyMC40LDYuNmMuNC0xLjQuOS0yLjksMS40LTQuMmwtMjAuNS02LjZjLS41LDEuNC0xLDIuOC0xLjQsNC4yWk0xNjkuMiwxNDcuNmgyMS41YzAtMS4yLjEtMi40LjEtMy42czAtMi40LS4xLTMuNmgtMjEuNWMuMSwxLjIuMiwyLjQuMiwzLjYsMCwxLjIsMCwyLjQtLjIsMy42Wk04MywxMDYuOGMtLjksMS4xLTEuNywyLjItMi41LDMuNGwxNy40LDEyLjZjLjgtMS4yLDEuNi0yLjMsMi41LTMuNGwtMTcuNC0xMi42Wk05MS44LDE0MS42aC0yMS41YzAsLjgsMCwxLjYsMCwyLjRzMCwxLjYsMCwyLjRoMjEuNWMwLS44LDAtMS42LDAtMi40czAtMS42LDAtMi40Wk05Mi45LDE5MS4xYzEuNCwxLjEsMi45LDIuMiw0LjQsMy4ybDEyLjYtMTcuNGMtMS42LTEtMy0yLjEtNC40LTMuMmwtMTIuNiwxNy40Wk0xMDkuMiwyMDAuNGMxLjguNywzLjYsMS4zLDUuNSwxLjhsNi43LTIwLjVjLTEuOS0uNS0zLjctMS4xLTUuNS0xLjhsLTYuNywyMC41Wk04MC4yLDE3Ny4zYzEsMS41LDIsMi45LDMuMSw0LjJsMTcuNC0xMi42Yy0xLjEtMS4zLTIuMS0yLjgtMy4xLTQuMmwtMTcuNCwxMi42Wk03Mi40LDE2MC4zYy40LDEuNiwxLDMuMiwxLjUsNC43bDIwLjUtNi42Yy0uNi0xLjUtMS4xLTMuMS0xLjUtNC43bC0yMC40LDYuNlpNMTMwLjUsMjA0LjNjMSwwLDIsMCwzLDB2LTIxLjVjLTEsMC0yLC4xLTMsLjFzLTIsMC0zLS4xdjIxLjVjMSwwLDIsMCwzLDBaTTE4OSwxMjljLS42LTIuNS0xLjQtNC45LTIuMy03LjJsLTIwLjUsNi43YzEsMi4zLDEuOCw0LjcsMi4zLDcuMmwyMC41LTYuN1pNMTQ2LjIsMjAyLjNjMi0uNSw0LTEuMiw2LTEuOWwtNi43LTIwLjVjLTEuOS44LTMuOSwxLjQtNiwxLjlsNi43LDIwLjVaTTE4Ni43LDE2NmMuOS0yLjIsMS42LTQuNCwyLjItNi43bC0yMC41LTYuN2MtLjUsMi4zLTEuMiw0LjYtMi4yLDYuN2wyMC41LDYuN1pNMTc3LjMsMTgyLjFjMS40LTEuNywyLjgtMy42LDQtNS41bC0xNy40LTEyLjdjLTEuMiwxLjktMi41LDMuOC00LDUuNWwxNy40LDEyLjdaTTE2My4zLDE5NC43YzEuOC0xLjIsMy42LTIuNSw1LjMtMy44bC0xMi43LTE3LjRjLTEuNiwxLjQtMy40LDIuNy01LjMsMy44bDEyLjYsMTcuNFoiLz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0yNDguNywxMjhoMTIuMnY3MC43aC0xMi4ydi03MC43WiIvPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0yNzUuMywxNjMuOGMwLTIxLjMsMTYuMS0zNy40LDM3LTM3LjRzMjMuNCw1LjMsMzAuMiwxNWwtOS43LDcuNGMtNS43LTcuNy0xMi44LTExLjMtMjAuNi0xMS4zLTEzLjUsMC0yNC4yLDEwLjctMjQuMiwyNS45czExLDI1LjksMjQuNCwyNS45LDE2LjQtNC4zLDIxLjktMTEuOGw5LjMsNi44Yy02LjgsMTAuMy0xOC4yLDE2LjEtMzEuMywxNi4xLTIxLjMsMC0zNi45LTE1LjUtMzYuOS0zNi42WiIvPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik00MjIuNCwxNjYuMWgtNTljMSwxNC45LDEwLjksMjMuNCwyNS4xLDIzLjRzMTcuNC0zLjksMjMuNC0xMmw4LjgsNi43Yy02LjgsMTAuMi0xOC4yLDE2LjEtMzIuNCwxNi4xLTIyLjEsMC0zNy4zLTE0LjktMzcuMy0zNi41czE1LjktMzcuNiwzNy40LTM3LjYsMzQuNSwxMy44LDM0LjUsMzQuNS0uMSwzLjYtLjQsNS4zWk0zNjQuMSwxNTUuNWg0Ni4yYy0xLjgtMTIuMi05LjktMTguNy0yMi0xOC43cy0yMS40LDYuOC0yNC4yLDE4LjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTQzMi40LDE4OS4xbDcuOC05LjJjNi43LDYuMywxNS41LDkuNSwyMy43LDkuNXMxNS4yLTQuMywxNS4yLTEwLjItMy4xLTcuNS0xMi4xLTkuNmwtMTIuNC0yLjhjLTE0LjItMy4yLTIwLjItOS4zLTIwLjItMTguOXMxMC42LTIxLjYsMjcuMS0yMS42LDIyLDQsMjguNywxMS4zbC04LjIsOC41Yy01LjgtNS44LTEzLjEtOC44LTIxLjMtOC44cy0xNC4zLDMuOS0xNC4zLDkuNiwyLjYsNi44LDEyLjQsOWwxMi40LDIuOGMxNC4zLDMuMiwxOS45LDkuNywxOS45LDE5LjVzLTEwLjIsMjIuMS0yNy42LDIyLjEtMjMuOS00LjMtMzEtMTEuM1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNTA1LjEsMTI4aDEyLjJ2NzAuN2gtMTIuMnYtNzAuN1oiLz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMjQ4LjcsMTAxLjF2LTEyLjNoMy43djEyYzAsMy43LDEuOCw1LjUsNC45LDUuNXM0LjktMS44LDQuOS01LjV2LTEyaDMuN3YxMi4zYzAsNS41LTMuMyw4LjYtOC42LDguNnMtOC42LTMuMS04LjYtOC42WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTI4NC43LDEwMC4zdjloLTMuNXYtOC4zYzAtMi42LTEuMi0zLjktMy4yLTMuOXMtMi42LjUtMy43LDEuOHYxMC40aC0zLjV2LTE1aDMuNXYxLjNjMS4yLTEsMi45LTEuNiw0LjYtMS42LDMuNSwwLDUuOCwyLjMsNS44LDYuNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0yODguOSw5MGMwLTEuMiwxLTIuMiwyLjMtMi4yczIuMiwxLDIuMiwyLjItMSwyLjMtMi4yLDIuMy0yLjMtMS0yLjMtMi4zWk0yODkuNCw5NC4zaDMuNXYxNWgtMy41di0xNVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0zMTIuMSw5NC4zbC02LjIsMTVoLTMuOGwtNi4yLTE1aDMuOWw0LjIsMTAuNyw0LjItMTAuN2gzLjlaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMzI5LjIsMTAyLjdoLTExLjljLjMsMi42LDIsNCw0LjYsNHMzLjItLjYsNC40LTIuMWwyLjUsMS45Yy0xLjYsMi4xLTQsMy4zLTcsMy4zLTQuOSwwLTguMS0zLjItOC4xLTcuOHMzLjMtOCw4LTgsNy41LDIuOSw3LjUsNy40LDAsLjksMCwxLjNaTTMxNy41LDEwMGg4LjNjLS40LTIuMS0xLjgtMy4xLTMuOS0zLjFzLTMuOCwxLjEtNC4zLDMuMVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0zNDIuNSw5NC4xbC0uMiwzLjNjLS41LDAtMS0uMS0xLjQtLjEtMS43LDAtMy4yLjgtNC4xLDIuM3Y5LjhoLTMuNXYtMTVoMy41djEuNmMxLTEuMywyLjYtMiw0LjItMnMxLDAsMS42LjJaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMzQ0LjksMTA3LjVsMS44LTIuNmMxLjYsMS4yLDMuMywxLjgsNSwxLjhzMi42LS43LDIuNi0xLjYtLjUtMS4yLTIuMS0xLjZsLTIuNi0uNmMtMy0uNy00LjMtMi00LjMtNC4xczIuMy00LjgsNi00LjgsNC43LjgsNi4yLDIuMmwtMS45LDIuNWMtMS40LTEuMS0yLjktMS43LTQuNS0xLjdzLTIuNC42LTIuNCwxLjUuNSwxLjEsMi4xLDEuNWwyLjYuNmMzLjEuNyw0LjMsMi4xLDQuMyw0LjJzLTIuMyw0LjktNi4yLDQuOS01LjEtLjktNi43LTIuMloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0zNjEsOTBjMC0xLjIsMS0yLjIsMi4zLTIuMnMyLjIsMSwyLjIsMi4yLTEsMi4zLTIuMiwyLjMtMi4zLTEtMi4zLTIuM1pNMzYxLjUsOTQuM2gzLjV2MTVoLTMuNXYtMTVaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMzg0LjMsODcuNnYyMS43aC0zLjV2LTEuMWMtMS4xLDEtMi43LDEuNS00LjMsMS41LTQuMSwwLTcuNS0zLjMtNy41LTcuOXMzLjQtNy45LDcuNS03LjksMy4yLjUsNC4zLDEuNXYtNy44aDMuNVpNMzgwLjgsMTA0Ljd2LTUuOGMtMS0xLjItMi40LTEuNy0zLjgtMS43LTIuNSwwLTQuNCwxLjgtNC40LDQuNnMxLjksNC42LDQuNCw0LjYsMi44LS42LDMuOC0xLjhaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNDAzLjUsOTQuM3YxNWgtMy41di0xLjFjLTEuMSwxLTIuNywxLjUtNC4zLDEuNS00LjEsMC03LjUtMy4zLTcuNS03LjlzMy40LTcuOSw3LjUtNy45LDMuMi41LDQuMywxLjV2LTEuMWgzLjVaTTQwMCwxMDQuN3YtNS44Yy0xLTEuMi0yLjQtMS43LTMuOC0xLjctMi41LDAtNC40LDEuOC00LjQsNC42czEuOSw0LjYsNC40LDQuNiwyLjgtLjYsMy44LTEuOFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik00MjIuOCw4Ny42djIxLjdoLTMuNXYtMS4xYy0xLjEsMS0yLjcsMS41LTQuMywxLjUtNC4xLDAtNy41LTMuMy03LjUtNy45czMuNC03LjksNy41LTcuOSwzLjIuNSw0LjMsMS41di03LjhoMy41Wk00MTkuMywxMDQuN3YtNS44Yy0xLTEuMi0yLjQtMS43LTMuOC0xLjctMi41LDAtNC40LDEuOC00LjQsNC42czEuOSw0LjYsNC40LDQuNiwyLjgtLjYsMy44LTEuOFoiLz4KICAgICAgPC9nPgogICAgPC9nPgogIDwvZz4KPC9zdmc+" alt="Universidad Icesi">
+  <span class="header-label">Desarrollando la Gran Idea</span>
+</header>
+
+<div id="login-view" class="login-wrap">
+  <div class="login-card">
+    <p class="eyebrow">Consulta de notas</p>
+    <h2>Tus resultados</h2>
+    <p>Ingresa tu código de estudiante para ver tus calificaciones y retroalimentación.</p>
+    <div class="input-row">
+      <input type="text" id="codigo-input" placeholder="Escribe tu código de estudiante" />
+      <button class="btn-primary" onclick="buscarEstudiante()">Ver</button>
+    </div>
+    <p class="error-msg" id="error-msg">Código no encontrado. Verifica e intenta de nuevo.</p>
+  </div>
+</div>
+
+<div id="result-view" style="display:none;">
+  <div class="container">
+    <div class="grade-banner">
+      <div class="grade-banner-left">
+        <p class="course">Desarrollando la Gran Idea</p>
+        <p class="name" id="student-name"></p>
+      </div>
+      <div class="grade-right">
+        <p class="glabel">Nota final</p>
+        <p class="gvalue" id="nota-final-display"></p>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('e1',this)">1ra entrega &nbsp;·&nbsp; 40%</button>
+      <button class="tab-btn" onclick="switchTab('e2',this)">2da entrega &nbsp;·&nbsp; 60%</button>
+    </div>
+    <div id="tab-e1" class="tab-content active">
+      <p class="section-label">Calificaciones</p>
+      <div class="score-grid">
+        <div class="score-card"><p class="sc-label">Evaluación del profesor</p><p class="sc-value" id="e1-prof"></p><p class="sc-weight">Peso 50%</p></div>
+        <div class="score-card"><p class="sc-label">Evaluación cliente</p><p class="sc-value" id="e1-cli"></p><p class="sc-weight">Peso 20%</p></div>
+        <div class="score-card"><p class="sc-label">Co-evaluación (pares)</p><p class="sc-value" id="e1-auto"></p><p class="sc-weight">Peso 30%</p></div>
+        <div class="score-card total"><p class="sc-label">Total primera entrega</p><p class="sc-value" id="e1-total"></p></div>
+      </div>
+      <p class="section-label">Retroalimentación</p>
+      <div class="fb-block logros"><p class="fb-title">✦ Tus logros</p><p id="fb-e1-logros"></p></div>
+      <div class="fb-block mejora"><p class="fb-title">◈ Para seguir creciendo</p><p id="fb-e1-mejora"></p></div>
+      <a id="video-e1" href="#" target="_blank" class="video-link">
+        <div class="play-icon"><svg viewBox="0 0 16 16"><path d="M5 3l9 5-9 5V3z"/></svg></div>
+        <div><span class="vl-label">Feedback del profesor</span>Ver video de la primera entrega</div>
+      </a>
+    </div>
+    <div id="tab-e2" class="tab-content">
+      <p class="section-label">Calificaciones</p>
+      <div class="score-grid">
+        <div class="score-card"><p class="sc-label">Co-evaluación (pares)</p><p class="sc-value" id="e2-auto"></p><p class="sc-weight">Peso 30%</p></div>
+        <div class="score-card"><p class="sc-label">Evaluación cliente / jurado</p><p class="sc-value" id="e2-cli"></p><p class="sc-weight">Peso 30%</p></div>
+        <div class="score-card"><p class="sc-label">Pitch / autoevaluación</p><p class="sc-value" id="e2-pitch"></p><p class="sc-weight">Peso 10%</p></div>
+        <div class="score-card"><p class="sc-label">Evaluación del profesor</p><p class="sc-value" id="e2-prof"></p><p class="sc-weight">Peso 30%</p></div>
+        <div class="score-card total"><p class="sc-label">Total segunda entrega</p><p class="sc-value" id="e2-total"></p></div>
+      </div>
+      <p class="section-label">Retroalimentación</p>
+      <div class="fb-block logros"><p class="fb-title">✦ Tus logros</p><p id="fb-e2-logros"></p></div>
+      <div class="fb-block mejora"><p class="fb-title">◈ Para seguir creciendo</p><p id="fb-e2-mejora"></p></div>
+      <a id="video-e2" href="#" target="_blank" class="video-link">
+        <div class="play-icon"><svg viewBox="0 0 16 16"><path d="M5 3l9 5-9 5V3z"/></svg></div>
+        <div><span class="vl-label">Feedback del profesor</span>Ver video de la segunda entrega</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const estudiantes=[
+{codigo:"A00431833",nombre:"Sebastián Ruiz Orozco",e1_prof:4.7,e1_cli:3.8,e1_auto:4.5,e1_video:"https://www.loom.com/share/fbf5e47b7f15437293b212283c51b001",e1_total:4.5,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.7,e2_video:"https://www.loom.com/share/9c1092cc06ef4f4ba712e5a818e114f9",e2_total:4.7,nota_final:4.6},
+{codigo:"A00425444",nombre:"Juan Camilo Álvarez Pinto",e1_prof:4.7,e1_cli:3.8,e1_auto:5,e1_video:"https://www.loom.com/share/fbf5e47b7f15437293b212283c51b001",e1_total:4.6,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.7,e2_video:"https://www.loom.com/share/9c1092cc06ef4f4ba712e5a818e114f9",e2_total:4.7,nota_final:4.7},
+{codigo:"A00189744",nombre:"Andrés Felipe Cabrera Zapata",e1_prof:4.7,e1_cli:3.8,e1_auto:5,e1_video:"https://www.loom.com/share/fbf5e47b7f15437293b212283c51b001",e1_total:4.6,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.7,e2_video:"https://www.loom.com/share/9c1092cc06ef4f4ba712e5a818e114f9",e2_total:4.7,nota_final:4.6},
+{codigo:"A00240256",nombre:"Leidy Carolina Castaño Paz",e1_prof:4.7,e1_cli:3.8,e1_auto:5,e1_video:"https://www.loom.com/share/fbf5e47b7f15437293b212283c51b001",e1_total:4.6,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.7,e2_video:"https://www.loom.com/share/9c1092cc06ef4f4ba712e5a818e114f9",e2_total:4.7,nota_final:4.6},
+{codigo:"A00157384",nombre:"Sofía Campos Puerta",e1_prof:4.7,e1_cli:3.8,e1_auto:5,e1_video:"https://www.loom.com/share/fbf5e47b7f15437293b212283c51b001",e1_total:4.6,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.7,e2_video:"https://www.loom.com/share/9c1092cc06ef4f4ba712e5a818e114f9",e2_total:4.7,nota_final:4.7},
+{codigo:"A00268584",nombre:"Brandon Felipe Pulgarín Rúa",e1_prof:4.7,e1_cli:4.2,e1_auto:5,e1_video:"https://www.loom.com/share/8f7c4e9edd354ea4a4377a493b443f5f",e1_total:4.7,e2_auto:5,e2_cli:4.5,e2_pitch:3.5,e2_prof:4.6,e2_video:"https://www.loom.com/share/16e9881585014021bd68c5c999dfd09f",e2_total:4.6,nota_final:4.6},
+{codigo:"A00340440",nombre:"Valentina Ruiz Rivera",e1_prof:4.7,e1_cli:4.2,e1_auto:5,e1_video:"https://www.loom.com/share/8f7c4e9edd354ea4a4377a493b443f5f",e1_total:4.7,e2_auto:5,e2_cli:4.5,e2_pitch:3.5,e2_prof:4.6,e2_video:"https://www.loom.com/share/16e9881585014021bd68c5c999dfd09f",e2_total:4.6,nota_final:4.6},
+{codigo:"A00430567",nombre:"Maricela Valencia",e1_prof:4.7,e1_cli:4.2,e1_auto:5,e1_video:"https://www.loom.com/share/8f7c4e9edd354ea4a4377a493b443f5f",e1_total:4.7,e2_auto:5,e2_cli:4.5,e2_pitch:3.5,e2_prof:4.6,e2_video:"https://www.loom.com/share/16e9881585014021bd68c5c999dfd09f",e2_total:4.6,nota_final:4.6},
+{codigo:"A00406155",nombre:"María del Mar Otálora Latorre",e1_prof:4.7,e1_cli:4.2,e1_auto:5,e1_video:"https://www.loom.com/share/8f7c4e9edd354ea4a4377a493b443f5f",e1_total:4.7,e2_auto:5,e2_cli:4.5,e2_pitch:3.5,e2_prof:4.6,e2_video:"https://www.loom.com/share/16e9881585014021bd68c5c999dfd09f",e2_total:4.6,nota_final:4.6},
+{codigo:"A00429541",nombre:"Berley Alexis Navarro Burbano",e1_prof:4.7,e1_cli:4.2,e1_auto:5,e1_video:"https://www.loom.com/share/8f7c4e9edd354ea4a4377a493b443f5f",e1_total:4.7,e2_auto:5,e2_cli:4.5,e2_pitch:3.5,e2_prof:4.6,e2_video:"https://www.loom.com/share/16e9881585014021bd68c5c999dfd09f",e2_total:4.6,nota_final:4.6},
+{codigo:"A00427245",nombre:"Norman Alfredo López Soto",e1_prof:4.7,e1_cli:2.9,e1_auto:5,e1_video:"https://www.loom.com/share/1355654de97741bea41ce9ea6773c449",e1_total:4.4,e2_auto:4.8,e2_cli:4.7,e2_pitch:3.4,e2_prof:4.5,e2_video:"https://www.loom.com/share/007caeb3358542509772913a852ed438",e2_total:4.5,nota_final:4.5},
+{codigo:"A00016812",nombre:"Juan Manuel Fajardo Fernández",e1_prof:4.7,e1_cli:2.9,e1_auto:5,e1_video:"https://www.loom.com/share/1355654de97741bea41ce9ea6773c450",e1_total:4.4,e2_auto:3.6,e2_cli:4.7,e2_pitch:3.4,e2_prof:4.5,e2_video:"https://www.loom.com/share/007caeb3358542509772913a852ed439",e2_total:4.2,nota_final:4.3},
+{codigo:"A00351953",nombre:"Nicolás Gómez Jiménez",e1_prof:4.7,e1_cli:2.9,e1_auto:5,e1_video:"https://www.loom.com/share/1355654de97741bea41ce9ea6773c451",e1_total:4.4,e2_auto:5,e2_cli:4.7,e2_pitch:3.4,e2_prof:4.5,e2_video:"https://www.loom.com/share/007caeb3358542509772913a852ed440",e2_total:4.6,nota_final:4.5},
+{codigo:"A00051884",nombre:"Erika Andrea Vargas Solarte",e1_prof:4.7,e1_cli:2.9,e1_auto:5,e1_video:"https://www.loom.com/share/1355654de97741bea41ce9ea6773c452",e1_total:4.4,e2_auto:4.8,e2_cli:4.7,e2_pitch:3.4,e2_prof:4.5,e2_video:"https://www.loom.com/share/007caeb3358542509772913a852ed441",e2_total:4.5,nota_final:4.5},
+{codigo:"A00427477",nombre:"María Camila Moreno Perlaza",e1_prof:4.7,e1_cli:2.9,e1_auto:5,e1_video:"https://www.loom.com/share/1355654de97741bea41ce9ea6773c453",e1_total:4.4,e2_auto:4.8,e2_cli:4.7,e2_pitch:3.4,e2_prof:4.5,e2_video:"https://www.loom.com/share/007caeb3358542509772913a852ed442",e2_total:4.5,nota_final:4.5},
+{codigo:"A00432507",nombre:"Jorge Mario Murillo Ariza",e1_prof:4.7,e1_cli:2.9,e1_auto:5,e1_video:"https://www.loom.com/share/1355654de97741bea41ce9ea6773c454",e1_total:4.4,e2_auto:4.8,e2_cli:4.7,e2_pitch:3.4,e2_prof:4.5,e2_video:"https://www.loom.com/share/007caeb3358542509772913a852ed443",e2_total:4.5,nota_final:4.5},
+{codigo:"A00431062",nombre:"Isabel Dayan Enríquez Gutiérrez",e1_prof:4.2,e1_cli:4,e1_auto:5,e1_video:"https://www.loom.com/share/da542591a7a64b08b970ade9c38146cd",e1_total:4.4,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.5,e2_video:"https://www.loom.com/share/093a7dc285c64eb3b2c7c700d6aaccef",e2_total:4.7,nota_final:4.6},
+{codigo:"A00238504",nombre:"Alejandro Duque Muñoz",e1_prof:4.2,e1_cli:4,e1_auto:5,e1_video:"https://www.loom.com/share/da542591a7a64b08b970ade9c38146cd",e1_total:4.4,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.5,e2_video:"https://www.loom.com/share/093a7dc285c64eb3b2c7c700d6aaccef",e2_total:4.7,nota_final:4.6},
+{codigo:"A00431934",nombre:"Valeria Ordoñez Arias",e1_prof:4.2,e1_cli:4,e1_auto:5,e1_video:"https://www.loom.com/share/da542591a7a64b08b970ade9c38146cd",e1_total:4.4,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.5,e2_video:"https://www.loom.com/share/093a7dc285c64eb3b2c7c700d6aaccef",e2_total:4.7,nota_final:4.6},
+{codigo:"A00418838",nombre:"Ruby Alejandra Murillo Chávez",e1_prof:4.2,e1_cli:4,e1_auto:5,e1_video:"https://www.loom.com/share/da542591a7a64b08b970ade9c38146cd",e1_total:4.4,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.5,e2_video:"https://www.loom.com/share/093a7dc285c64eb3b2c7c700d6aaccef",e2_total:4.7,nota_final:4.6},
+{codigo:"A00069504",nombre:"Lorena Holguín Vargas",e1_prof:4.2,e1_cli:4,e1_auto:5,e1_video:"https://www.loom.com/share/da542591a7a64b08b970ade9c38146cd",e1_total:4.4,e2_auto:5,e2_cli:4.9,e2_pitch:3.6,e2_prof:4.5,e2_video:"https://www.loom.com/share/093a7dc285c64eb3b2c7c700d6aaccef",e2_total:4.7,nota_final:4.6},
+{codigo:"A00428270",nombre:"Brandon Stiven Manzano Rivera",e1_prof:4.2,e1_cli:4.2,e1_auto:5,e1_video:"https://www.loom.com/share/e82beee8b2874429bf0feab04f2b402b",e1_total:4.4,e2_auto:5,e2_cli:4.3,e2_pitch:3.4,e2_prof:4.6,e2_video:"https://www.loom.com/share/d4893595c24f42c6bde7913844f39e43",e2_total:4.5,nota_final:4.5},
+{codigo:"A00392489",nombre:"Carol Jennifer Cardozo Jiménez",e1_prof:4.2,e1_cli:4.2,e1_auto:4.7,e1_video:"https://www.loom.com/share/e82beee8b2874429bf0feab04f2b402b",e1_total:4.4,e2_auto:3.6,e2_cli:4.3,e2_pitch:3.4,e2_prof:4.6,e2_video:"https://www.loom.com/share/d4893595c24f42c6bde7913844f39e44",e2_total:4.1,nota_final:4.2},
+{codigo:"A00430398",nombre:"Donney López Araujo",e1_prof:4.2,e1_cli:4.2,e1_auto:4.7,e1_video:"https://www.loom.com/share/e82beee8b2874429bf0feab04f2b402b",e1_total:4.4,e2_auto:5,e2_cli:4.3,e2_pitch:3.4,e2_prof:4.6,e2_video:"https://www.loom.com/share/d4893595c24f42c6bde7913844f39e45",e2_total:4.5,nota_final:4.4},
+{codigo:"A00431967",nombre:"Nicolás Arcos Hidalgo",e1_prof:4.2,e1_cli:4.2,e1_auto:5,e1_video:"https://www.loom.com/share/e82beee8b2874429bf0feab04f2b402b",e1_total:4.4,e2_auto:5,e2_cli:4.3,e2_pitch:3.4,e2_prof:4.6,e2_video:"https://www.loom.com/share/d4893595c24f42c6bde7913844f39e46",e2_total:4.5,nota_final:4.5},
+{codigo:"A00365165",nombre:"Nicolás Castillo Agudelo",e1_prof:4.2,e1_cli:4.2,e1_auto:5,e1_video:"https://www.loom.com/share/e82beee8b2874429bf0feab04f2b402b",e1_total:4.4,e2_auto:5,e2_cli:4.3,e2_pitch:3.4,e2_prof:4.6,e2_video:"https://www.loom.com/share/d4893595c24f42c6bde7913844f39e47",e2_total:4.5,nota_final:4.5}
+];
+function generarFeedback(e){
+  const fb={e1:{logros:"",mejora:""},e2:{logros:"",mejora:""}};
+  let l1=[];
+  if(e.e1_prof>=4.5)l1.push("La evaluación del profesor destacó la profundidad de tu investigación y la claridad en la organización de tus insights, señales de un proceso de diseño riguroso.");
+  else if(e.e1_prof>=4.0)l1.push("El profesor reconoció un trabajo bien estructurado en investigación e insights, con espacio para profundizar aún más en los análisis.");
+  else l1.push("Tu proceso de investigación mostró bases sólidas que pueden fortalecerse con métodos más variados y síntesis más detallada.");
+  if(e.e1_auto>=4.8)l1.push("Tu equipo te valoró al máximo en co-evaluación, un reconocimiento a tu contribución constante, tu colaboración activa y tu comunicación efectiva.");
+  else if(e.e1_auto>=4.0)l1.push("Tus compañeros reconocieron tu participación y aporte al equipo durante esta primera entrega.");
+  if(e.e1_cli>=4.5)l1.push("El cliente validó que tu propuesta era relevante y viable para su realidad, lo que demuestra que lograste conectar el diseño con el contexto real del reto.");
+  fb.e1.logros=l1.join(" ");
+  let m1=[];
+  if(e.e1_cli<3.5)m1.push("La evaluación del cliente ("+e.e1_cli+") es el área con mayor oportunidad de mejora. Con frecuencia, la brecha entre una buena propuesta y la percepción del cliente tiene que ver con cómo se comunica su viabilidad práctica. Vale la pena preguntarse: ¿estamos hablando el idioma del cliente?");
+  else if(e.e1_cli<4.5)m1.push("La evaluación del cliente ("+e.e1_cli+") tiene margen de crecimiento. Acercarse al nivel excelente implica que el cliente sienta que la propuesta encaja perfectamente con sus recursos y resuelve algo cotidiano para su equipo.");
+  if(e.e1_auto<4.5)m1.push("La co-evaluación de tus pares ("+e.e1_auto+") indica oportunidad para hacer más visible tu contribución: ideas clave, tareas complejas y comunicación proactiva son los factores que más impactan esta percepción.");
+  if(m1.length===0)m1.push("Tu desempeño en esta entrega fue muy sólido en todos los criterios. El reto para adelante es sostener este nivel e ir profundizando en la conexión entre investigación y propuesta de valor.");
+  fb.e1.mejora=m1.join(" ");
+  let l2=[];
+  if(e.e2_prof>=4.5)l2.push("El profesor reconoció la madurez del proyecto en la entrega final ("+e.e2_prof+"), reflejo de un proceso de diseño completo, con iteración real y propuesta de valor sólida.");
+  else if(e.e2_prof>=4.0)l2.push("La evaluación del profesor reflejó un proyecto con buenas bases y capacidad de evolución durante el semestre.");
+  if(e.e2_cli>=4.7)l2.push("El cliente / jurado validó la propuesta como altamente viable, factible y deseable: un resultado que demuestra que la solución conectó con la realidad del reto.");
+  else if(e.e2_cli>=4.3)l2.push("El cliente valoró positivamente la propuesta, reconociendo su utilidad e innovación para el contexto del reto.");
+  if(e.e2_auto>=4.8)l2.push("Tu equipo mantuvo una co-evaluación alta ("+e.e2_auto+"), lo que muestra consistencia en la colaboración a lo largo del semestre, un logro que no es fácil de sostener.");
+  else if(e.e2_auto>=4.0)l2.push("La co-evaluación de tus pares ("+e.e2_auto+") refleja una participación activa en el tramo final del proyecto.");
+  fb.e2.logros=l2.join(" ");
+  let m2=[];
+  if(e.e2_auto<4.0)m2.push("La co-evaluación de tus pares en esta entrega ("+e.e2_auto+") bajó respecto a lo esperado. Puede señalar que en la fase final hubo menor visibilidad de tus aportes o que la dinámica del equipo cambió al acercarse el cierre. Reflexionar sobre cómo mantienes tu presencia activa en etapas de alta presión es un aprendizaje valioso.");
+  if(e.e2_pitch<3.8)m2.push("El componente de Pitch / autoevaluación ("+e.e2_pitch+") es el área con más potencial de mejora. La capacidad de presentar y defender ideas en vivo —con claridad, confianza y capacidad de responder al jurado— es una habilidad que se entrena con práctica deliberada.");
+  if(e.e2_cli<4.3)m2.push("La evaluación del cliente ("+e.e2_cli+") indica que la propuesta puede ganar en deseabilidad y viabilidad percibida. Conectar la solución con problemas cotidianos del equipo del cliente y mostrar un camino realista de implementación son dos palancas clave.");
+  if(m2.length===0)m2.push("Tu desempeño en la entrega final fue muy consistente. El reto hacia adelante es seguir desarrollando la capacidad de presentar y argumentar propuestas complejas con la misma solidez con que las diseñas.");
+  fb.e2.mejora=m2.join(" ");
+  return fb;
+}
+function buscarEstudiante(){
+  const codigo=document.getElementById('codigo-input').value.trim().toUpperCase();
+  const est=estudiantes.find(e=>e.codigo.toUpperCase()===codigo);
+  const errEl=document.getElementById('error-msg');
+  if(!est){errEl.style.display='block';return;}
+  errEl.style.display='none';
+  const fb=generarFeedback(est);
+  document.getElementById('student-name').textContent=est.nombre;
+  document.getElementById('nota-final-display').innerHTML=est.nota_final.toFixed(1)+'<span class="gdenom"> / 5.0</span>';
+  document.getElementById('e1-prof').textContent=est.e1_prof.toFixed(1);
+  document.getElementById('e1-cli').textContent=est.e1_cli.toFixed(1);
+  document.getElementById('e1-auto').textContent=est.e1_auto.toFixed(1);
+  document.getElementById('e1-total').textContent=est.e1_total.toFixed(1);
+  document.getElementById('e2-auto').textContent=est.e2_auto.toFixed(1);
+  document.getElementById('e2-cli').textContent=est.e2_cli.toFixed(1);
+  document.getElementById('e2-pitch').textContent=est.e2_pitch.toFixed(1);
+  document.getElementById('e2-prof').textContent=est.e2_prof.toFixed(1);
+  document.getElementById('e2-total').textContent=est.e2_total.toFixed(1);
+  document.getElementById('fb-e1-logros').textContent=fb.e1.logros;
+  document.getElementById('fb-e1-mejora').textContent=fb.e1.mejora;
+  document.getElementById('fb-e2-logros').textContent=fb.e2.logros;
+  document.getElementById('fb-e2-mejora').textContent=fb.e2.mejora;
+  document.getElementById('video-e1').href=est.e1_video;
+  document.getElementById('video-e2').href=est.e2_video;
+  document.getElementById('login-view').style.display='none';
+  document.getElementById('result-view').style.display='block';
+  switchTab('e1',document.querySelector('.tab-btn'));
+}
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+document.getElementById('codigo-input').addEventListener('keydown',function(e){if(e.key==='Enter')buscarEstudiante();});
+</script>
+</body>
+</html>
