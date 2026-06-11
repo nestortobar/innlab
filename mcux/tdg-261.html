@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visor de Notas — Maestría en Creación de Experiencias Digitales</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f4f4f6;min-height:100vh;display:flex;flex-direction:column}
+header{background:#5454e9;padding:14px 28px;display:flex;align-items:center;position:sticky;top:0;z-index:100}
+.main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px}
+#login-view{background:#fff;border-radius:18px;padding:44px 40px;max-width:440px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.07);margin:auto}
+#login-view h1{font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:6px}
+#login-view .subtitle{font-size:14px;color:#6b6b80;margin-bottom:28px;line-height:1.5}
+.input-wrap{margin-bottom:14px}
+.input-wrap input{width:100%;border:1.5px solid #ddd;border-radius:10px;padding:14px 16px;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:.06em;outline:none;transition:border-color .2s}
+.input-wrap input:focus{border-color:#5454e9}
+.btn-primary{width:100%;background:#5454e9;color:#fff;border:none;border-radius:10px;padding:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-primary:hover{background:#4040cc}
+.error-msg{color:#e05252;font-size:13px;font-weight:600;margin-top:8px;display:none}
+#result-view{max-width:680px;width:100%;display:none}
+.grade-banner{background:#5454e9;border-radius:16px;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.banner-left p.eyebrow{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.banner-left p.student-name{font-size:19px;font-weight:800;color:#fff;margin-bottom:2px}
+.banner-left p.project-name{font-size:12px;color:rgba(255,255,255,.65);font-weight:500}
+.banner-right{text-align:right}
+.banner-right .label{font-size:11px;font-weight:600;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em}
+.banner-right .nota{font-size:42px;font-weight:800;color:#e4eb60;line-height:1}
+.banner-right .nota span{font-size:16px;color:rgba(255,255,255,.4);font-weight:500}
+/* tabs */
+.tabs{display:flex;gap:8px;margin-bottom:20px}
+.tab-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid #ddd;background:#fff;font-family:inherit;font-size:13px;font-weight:700;color:#888;cursor:pointer;transition:all .15s}
+.tab-btn.active{background:#5454e9;border-color:#5454e9;color:#fff}
+/* section title */
+.section-title{font-size:11px;font-weight:700;color:#9090a0;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+/* summary cards */
+.cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.card{background:#fff;border-radius:12px;padding:16px 18px;border:1px solid #e8e8f0}
+.card .card-label{font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.card .card-value{font-size:26px;font-weight:800;color:#1a1a2e}
+.card-total{grid-column:1/-1;background:#f0f0fd;border-color:#c8c8f5}
+.card-total .card-label{color:#7070c0}
+.card-total .card-value{color:#5454e9;font-size:30px}
+/* rubric table */
+.rubric-wrap{background:#fff;border-radius:14px;border:1px solid #e8e8f0;overflow:hidden;margin-bottom:20px}
+.rubric-header{background:#f7f7fb;padding:12px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;border-bottom:1px solid #eee}
+.rubric-header span.rh-title{font-size:12px;font-weight:800;color:#5454e9;text-transform:uppercase;letter-spacing:.07em;flex:1}
+.rubric-header .rh-avg{font-size:13px;font-weight:700;color:#888}
+.rubric-header .chevron{font-size:12px;color:#aaa;transition:transform .2s}
+.rubric-header.open .chevron{transform:rotate(180deg)}
+.rubric-body{display:none;padding:0 18px 14px}
+.rubric-header.open + .rubric-body{display:block}
+.criterion-row{padding:12px 0;border-bottom:1px solid #f0f0f8}
+.criterion-row:last-child{border-bottom:none}
+.cr-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.cr-name{font-size:12px;font-weight:700;color:#1a1a2e;flex:1}
+.cr-score{font-size:13px;font-weight:800;color:#5454e9;white-space:nowrap}
+.cr-dots{display:flex;gap:3px}
+.dot{width:9px;height:9px;border-radius:50%;background:#e0e0f0}
+.dot.filled-4{background:#5454e9}
+.dot.filled-3{background:#7b7bee}
+.dot.filled-2{background:#e9683b}
+.dot.filled-1{background:#e05252}
+.cr-text{font-size:12.5px;color:#555;line-height:1.6}
+/* feedback blocks */
+.fb-block{border-radius:12px;padding:18px 20px;margin-bottom:12px}
+.fb-jurados{border-left:3px solid #5454e9;background:#f0f0fd}
+.fb-director{border-left:3px solid #e9683b;background:#fdf3ef}
+.fb-logros{border-left:3px solid #27ae60;background:#edf7f0}
+.fb-mejora{border-left:3px solid #e6a817;background:#fef9ec}
+.fb-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.fb-jurados .fb-title{color:#5454e9}
+.fb-director .fb-title{color:#c04a20}
+.fb-logros .fb-title{color:#27ae60}
+.fb-mejora .fb-title{color:#c68000}
+.fb-body{font-size:13.5px;color:#333;line-height:1.65;font-weight:400;white-space:pre-line}
+/* formula */
+.formula-note{margin-top:20px;background:#fff;border-radius:12px;padding:14px 18px;border:1px solid #e8e8f0;font-size:12px;color:#888}
+.formula-note strong{color:#5454e9}
+footer{text-align:center;padding:20px;font-size:12px;color:#aaa}
+@media(max-width:520px){
+  .cards-grid{grid-template-columns:1fr}
+  .card-total{grid-column:1/-1}
+  .grade-banner{flex-direction:column;align-items:flex-start;gap:14px}
+  .banner-right{text-align:left}
+  #login-view{padding:32px 20px}
+}
+</style>
+</head>
+<body>
+<header><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FwYV8yIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDExMjIuMTUgMjIwLjg0Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuMy4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjMgQnVpbGQgMTgyKSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICNmZmZmZmY7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxnIGlkPSJDYXBhXzEiPgogICAgPGc+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNi4zOSwxNzIuMjdWMjUuMTdoMTkuMzV2MTQ3LjA5aC0xOS4zNVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNjguNTEsMTcyLjI3VjI1LjE3aDE2LjE5bDg0LjUsMTE4Ljg2LTcuMzEuNzlWMjUuMTdoMTkuNTV2MTQ3LjA5aC0xNi4xOUw4MS4xNSw1Mi42Mmw2LjcxLS43OXYxMjAuNDRoLTE5LjM1WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yMTQuMjIsMTcyLjI3VjI1LjE3aDE2LjE5bDg0LjUsMTE4Ljg2LTcuMzEuNzlWMjUuMTdoMTkuNTV2MTQ3LjA5aC0xNi4xOWwtODQuMTEtMTE5LjY1LDYuNzEtLjc5djEyMC40NGgtMTkuMzVaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTM1OS45MywxNzIuMjdWMjUuMTdoMTkuMzV2MTI5LjMyaDY0LjU2djE3Ljc3aC04My45MVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNDUxLjM0LDE3Mi4yN2w1Mi43Mi0xNDcuMDloMjIuOWw1Mi43MiwxNDcuMDloLTIwLjczbC0xMi4wNC0zNC41NWgtNjIuNzlsLTEyLjA0LDM0LjU1aC0yMC43M1pNNDkwLjI0LDExOS45NWg1MC41NGwtMjguMDQtODAuNzVoNS41M2wtMjguMDQsODAuNzVaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTU5OC4yNCwxNzIuMjdWMjUuMTdoNjEuOGM4LjgyLDAsMTYuNDIsMS41OCwyMi44LDQuNzQsNi4zOCwzLjE2LDExLjMyLDcuNiwxNC44MSwxMy4zMywzLjQ5LDUuNzMsNS4yMywxMi41NCw1LjIzLDIwLjQzLDAsNy4yNC0xLjg4LDEzLjc5LTUuNjMsMTkuNjUtMy43NSw1Ljg2LTkuMjUsMTAuNDMtMTYuNDksMTMuNzJsLS4yLTcuMzFjNi4zMiwyLjM3LDExLjU1LDUuNSwxNS43LDkuMzgsNC4xNSwzLjg4LDcuMjcsOC4zNiw5LjM4LDEzLjQzLDIuMSw1LjA3LDMuMTYsMTAuNDMsMy4xNiwxNi4wOSwwLDEzLjU2LTQuMzQsMjQuMjItMTMuMDMsMzEuOTktOC42OSw3Ljc3LTIwLjUzLDExLjY1LTM1LjU0LDExLjY1aC02MlpNNjE3LjU5LDg1LjU5aDQyLjA1YzcuMTEsMCwxMi44My0yLjA3LDE3LjE4LTYuMjIsNC4zNC00LjE1LDYuNTItOS40NCw2LjUyLTE1Ljg5cy0yLjE3LTExLjg1LTYuNTItMTUuNGMtNC4zNC0zLjU1LTEwLjA3LTUuMzMtMTcuMTgtNS4zM2gtNDIuMDV2NDIuODRaTTYxNy41OSwxNTQuNWg0My40NGM4LjU1LDAsMTUuNC0yLjMsMjAuNTMtNi45MSw1LjEzLTQuNjEsNy43LTEwLjg2LDcuNy0xOC43NnMtMi41Ny0xNC4xOC03LjctMTguODZjLTUuMTMtNC42Ny0xMS45OC03LjAxLTIwLjUzLTcuMDFoLTQzLjQ0djUxLjUzWiIvPgogICAgICA8L2c+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4=" alt="Universidad Icesi" height="26"></header>
+<div class="main">
+<div id="login-view">
+  <h1>Consulta tu calificación</h1>
+  <p class="subtitle">Ingresa tu código de estudiante para ver tus notas del proyecto de grado.</p>
+  <div class="input-wrap">
+    <input type="text" id="codigo-input" placeholder="Ej: A00123456" autocomplete="off" spellcheck="false">
+  </div>
+  <button class="btn-primary" onclick="buscarEstudiante()">Ver mis notas</button>
+  <p class="error-msg" id="error-msg">Código no encontrado. Verifica e intenta de nuevo.</p>
+</div>
+<div id="result-view">
+<div class="grade-banner">
+  <div class="banner-left">
+    <p class="eyebrow">Maestría en Creación de Experiencias Digitales</p>
+    <p class="student-name" id="r-nombre"></p>
+    <p class="project-name" id="r-proyecto"></p>
+  </div>
+  <div class="banner-right">
+    <p class="label">Nota final</p>
+    <p class="nota" id="r-nf"></p>
+  </div>
+</div>
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('pf',this)">Presentación Final</button>
+  <button class="tab-btn" onclick="showTab('doc',this)">Documento</button>
+  <button class="tab-btn" onclick="showTab('tutor',this)">Evaluación Tutor</button>
+</div>
+<div id="tab-pf">
+  <p class="section-title">Presentación Final · 20%</p>
+  <div class="cards-grid">
+    <div class="card"><p class="card-label">Promedio evaluadores</p><p class="card-value" id="pf-val"></p></div>
+    <div class="card card-total"><p class="card-label">Aporte a nota final (×20%)</p><p class="card-value" id="pf-aporte"></p></div>
+  </div>
+  <div id="pf-rubric"></div>
+  <div class="fb-block fb-jurados">
+    <p class="fb-title">◆ Retroalimentación de jurados</p>
+    <p class="fb-body" id="pf-jurados"></p>
+  </div>
+  <div class="fb-block fb-director" style="margin-bottom:0">
+    <p class="fb-title">◆ Retroalimentación del director del programa</p>
+    <p class="fb-body" id="pf-director"></p>
+  </div>
+</div>
+<div id="tab-doc" style="display:none">
+  <p class="section-title">Documento · 40%</p>
+  <div class="cards-grid">
+    <div class="card"><p class="card-label">Nota del documento</p><p class="card-value" id="doc-val"></p></div>
+    <div class="card card-total"><p class="card-label">Aporte a nota final (×40%)</p><p class="card-value" id="doc-aporte"></p></div>
+  </div>
+  <div id="doc-rubric"></div>
+  <div class="fb-block fb-logros">
+    <p class="fb-title">✓ Tus logros</p>
+    <p class="fb-body" id="doc-logros"></p>
+  </div>
+  <div class="fb-block fb-mejora" style="margin-bottom:0">
+    <p class="fb-title">→ Para seguir creciendo</p>
+    <p class="fb-body" id="doc-mejora"></p>
+  </div>
+</div>
+<div id="tab-tutor" style="display:none">
+  <p class="section-title">Evaluación del Tutor · 30%</p>
+  <div class="cards-grid">
+    <div class="card"><p class="card-label">Nota del tutor</p><p class="card-value" id="tutor-val"></p></div>
+    <div class="card card-total"><p class="card-label">Aporte a nota final (×30%)</p><p class="card-value" id="tutor-aporte"></p></div>
+  </div>
+  <div id="tutor-rubric"></div>
+  <div class="fb-block fb-logros">
+    <p class="fb-title">✓ Tus logros</p>
+    <p class="fb-body" id="tutor-logros"></p>
+  </div>
+  <div class="fb-block fb-mejora" style="margin-bottom:0">
+    <p class="fb-title">→ Para seguir creciendo</p>
+    <p class="fb-body" id="tutor-mejora"></p>
+  </div>
+</div>
+<div class="formula-note">
+  <strong>Fórmula:</strong> Presentación Final (20%) + Documento (40%) + Evaluación Tutor (30%) = 90% ponderado · normalizado a 5.0
+</div>
+</div>
+</div>
+<footer>Universidad Icesi · Maestría en Creación de Experiencias Digitales · 2025–1</footer>
+<script>
+const estudiantes=[
+  {
+    "codigo": "A00346878",
+    "nombre": "Daniel Esteban Guzmán Tabares",
+    "proyecto": "Boletines Agroclimáticos",
+    "pf": 3.75,
+    "doc": 4.0,
+    "tutor": 4.6875,
+    "nf": 4.17
+  },
+  {
+    "codigo": "A00415821",
+    "nombre": "Felipe Silva Herrán",
+    "proyecto": "Servicios financieros de vivienda del FNA",
+    "pf": 3.625,
+    "doc": 3.8,
+    "tutor": 5.0,
+    "nf": 4.16
+  },
+  {
+    "codigo": "A00380426",
+    "nombre": "Juan David Benítez Vergara",
+    "proyecto": "Rediseño de la experiencia del emprendedor - Icesi Emprende",
+    "pf": 3.167,
+    "doc": 4.5,
+    "tutor": 4.8,
+    "nf": 4.3
+  },
+  {
+    "codigo": "A00413630",
+    "nombre": "Julián Echeverri Mejía",
+    "proyecto": "Figatech adopción y escalabilidad operativa",
+    "pf": 3.531,
+    "doc": 4.4,
+    "tutor": 5.0,
+    "nf": 4.41
+  },
+  {
+    "codigo": "A00413007",
+    "nombre": "Leandro García Pardo",
+    "proyecto": "Nexus Ecosistema digital",
+    "pf": 3.25,
+    "doc": 3.8,
+    "tutor": 4.8,
+    "nf": 4.01
+  },
+  {
+    "codigo": "A00355011",
+    "nombre": "Luisa Fernanda Moncayo Flor",
+    "proyecto": "Servicios financieros de vivienda del FNA",
+    "pf": 3.625,
+    "doc": 3.8,
+    "tutor": 5.0,
+    "nf": 4.16
+  },
+  {
+    "codigo": "A00345973",
+    "nombre": "Mayra Alejandra Barbosa Ramos",
+    "proyecto": "Rediseño de la experiencia del emprendedor - Icesi Emprende",
+    "pf": 3.167,
+    "doc": 4.5,
+    "tutor": 4.8,
+    "nf": 4.3
+  },
+  {
+    "codigo": "A00028336",
+    "nombre": "Nicolás Antonio Reyes Buzeta",
+    "proyecto": "Nexus Ecosistema digital",
+    "pf": 3.25,
+    "doc": 3.8,
+    "tutor": 4.8,
+    "nf": 4.01
+  },
+  {
+    "codigo": "A00414439",
+    "nombre": "Sebastián López Astudillo",
+    "proyecto": "Boletines Agroclimáticos",
+    "pf": 3.75,
+    "doc": 4.0,
+    "tutor": 4.6875,
+    "nf": 4.17
+  },
+  {
+    "codigo": "A00414888",
+    "nombre": "Valentina Benítez Ramírez",
+    "proyecto": "Nexus Ecosistema digital",
+    "pf": 3.25,
+    "doc": 3.8,
+    "tutor": 4.8,
+    "nf": 4.01
+  },
+  {
+    "codigo": "A00414449",
+    "nombre": "Viviana Andrea Álvarez Rojas",
+    "proyecto": "Figatech adopción y escalabilidad operativa",
+    "pf": 3.531,
+    "doc": 4.4,
+    "tutor": 5.0,
+    "nf": 4.41
+  },
+  {
+    "codigo": "A00409231",
+    "nombre": "Luis Carlos Rivera",
+    "proyecto": "FisioMesa Fisioterapia Privada",
+    "pf": 3.292,
+    "doc": 4.9,
+    "tutor": 4.7,
+    "nf": 4.48
+  }
+];
+const feedbacks={
+  "Nexus Ecosistema digital": {
+    "pf_jurados": "La presentacion fue bien recibida. El equipo demostro comprension sistemica del problema y articulo con claridad los quiebres del sistema de casas. Las preguntas del jurado se concentraron en tres areas.\n\nSobre los indicadores de exito: se valoro que el equipo conectara sus metricas con los hallazgos iniciales (participacion estudiantil, percepcion de justicia, adopcion del sistema). Sin embargo, la propuesta de medicion quedo en un nivel general; para una implementacion real, cada flujo e interaccion deberia tener su propio indicador puntual.\n\nSobre la experiencia transformada: el jurado senalo que la solucion resuelve bien la carga operativa y la transparencia, pero los elementos humanos como liderazgo, sentido de pertenencia y cultura de participacion no se resuelven solo con tecnologia. La pregunta que quedo abierta es cual es la experiencia que Nexus transforma emocionalmente para el estudiante que hoy no participa, mas alla de gestionar tablas y puntajes.\n\nSobre la escalabilidad: el equipo exploro un modelo de suscripcion con funcionalidades desbloqueables para otros contextos, lo cual fue valorado. Sin embargo, el plan de transicion hacia esos contextos y el modelo de negocio concreto quedaron poco desarrollados.",
+    "pf_director": "La presentacion fue fluida, bien estructurada y se noto preparada. El inicio fue contundente y la sintesis de un proyecto con mucha informacion fue adecuada para el tiempo disponible.\n\nUn aprendizaje para futuras presentaciones: el prototipo aparecio cuando faltaban cuatro minutos. Dado el tamano y la complejidad de Nexus, mostrarlo desde el minuto seis habria permitido que el jurado lo recorriera con mas contexto. La estrategia de mostrar el prototipo en movimiento (GIFs, video con narracion en voz) fue una buena decision de comunicacion.\n\nEn la sesion de preguntas hubo un momento de silencio prolongado en la primera pregunta: cada integrante esperaba que el otro entrara, y eso genero una sensacion de inseguridad que no correspondia con el dominio real del equipo. En la segunda pregunta lo resolvieron bien: respondieron con solidez y de forma complementaria. Para cualquier presentacion futura, definir de antemano quien responde primero a cada tipo de pregunta evita ese bache.",
+    "doc_logros": "El texto esta bien escrito y presenta una propuesta interesante de expansion a otros contextos. La posibilidad de impacto en escenarios reales deja abierta una oportunidad de continuidad investigativa.",
+    "doc_mejora": "El documento es escueto en la mayoria de sus secciones. La ausencia de pantallas o enlace al prototipo limita la comprension de la solucion y dificulta verificar las aseveraciones. Las conclusiones y referencias requieren mayor desarrollo; las referencias deben organizarse alfabeticamente.",
+    "tutor_logros": "El tutor reconocio el trabajo de investigacion e interfaces digitales. La comprension sistemica del problema y la implementacion de metricas fueron valoradas positivamente.",
+    "tutor_mejora": "La generacion de valor (soluciones factibles y deseables) y la estrategia de medicion fueron los criterios con menor puntuacion. Precisar el modelo de negocio y los indicadores de impacto fortaleceria significativamente la propuesta."
+  },
+  "Rediseño de la experiencia del emprendedor - Icesi Emprende": {
+    "pf_jurados": "El proyecto fue bien valorado. Las preguntas del jurado se centraron en tres aspectos.\n\nSobre el tamano de muestra en las pruebas SUS: se pregunto cuantos usuarios se utilizaron por iteracion. El equipo respondio cinco por ronda, con usuarios unicos entre iteraciones para evitar sesgos de exposicion previa. Este dato era relevante y no habia quedado explicito en la presentacion. Para futuras defensas, aclarar ese detalle dentro del relato de la metodologia fortalece la confianza en los datos.\n\nSobre la metrica de conexion: el jurado pidio claridad sobre que significaba concretamente ese indicador y como se validaria. La explicacion de que hay un dashboard de administracion con metricas en tiempo real no habia quedado visible en la presentacion principal. En diseno de experiencias, las metricas de exito deben articularse con la misma claridad que los hallazgos de investigacion.\n\nSobre la adopcion futura: las pruebas de usabilidad miden facilidad de uso, pero no deseabilidad ni adopcion real. El jurado invito a reflexionar sobre como se espera que ocurra la adopcion en un contexto institucional con multiples actores. El equipo respondio con responsabilidad al mencionar la articulacion con una estrategia institucional hacia 2027.",
+    "pf_director": "Las pocas preguntas del jurado pueden leerse como una senal positiva: la presentacion fue suficientemente clara como para anticipar las dudas dentro del propio relato. Esa es una habilidad comunicativa valiosa en diseno de experiencias.\n\nLa evolucion entre la presentacion de practica y la presentacion final fue notoria. La sesion previa sirvio exactamente para lo que debe servir: identificar que no esta claro, ajustar el ritmo y llegar con mayor confianza. Iterar la presentacion como si fuera el producto es una practica que conviene sostener en la vida profesional.",
+    "doc_logros": "El documento muestra un trabajo serio de investigacion con un SUS de 95 y un proceso metodologico bien documentado. Las referencias en APA, la identificacion de roles de equipo y los impactos eticos son fortalezas claras del reporte.",
+    "doc_mejora": "No hay ni un solo screenshot del prototipo en el documento. En diseno de experiencias digitales, la evidencia visual de la solucion es obligatoria. Ademas, los 68 estudiantes de pregrado mencionados desaparecen del analisis; si se incluyen como grupo de validacion, deben mostrarse sus datos.",
+    "tutor_logros": "La evaluacion del tutor reconocio el nivel de rigor y coherencia del proceso. Los criterios de prototipado, generacion de valor y comunicacion oral fueron valorados con las puntuaciones mas altas.",
+    "tutor_mejora": "La estrategia de medicion fue el criterio con menor puntaje del tutor. Definir indicadores de exito especificos y escalables en el tiempo haria el proyecto mas solido para una eventual implementacion real en Icesi Emprende."
+  },
+  "FisioMesa Fisioterapia Privada": {
+    "pf_jurados": "El proyecto fue reconocido como maduro, juicioso y con un nivel de compromiso que iba mas alla del encargo academico. Las preguntas y comentarios del jurado se concentraron en tres areas.\n\nSobre el diferenciador de la propuesta: se senalo que la solucion resuelve bien la estandarizacion de informacion y la organizacion del catalogo, pero el gran diferenciador frente a soluciones existentes no se defendio con suficiente contundencia. La arquitectura de informacion adaptada especificamente a las necesidades clinicas del fisioterapeuta es, en si misma, el diferenciador mas fuerte. Ese argumento podia construirse explicita mente: ninguna plataforma generica organiza el catalogo desde el contexto clinico del profesional.\n\nSobre la experiencia de confianza: la capa emocional era el objetivo central del proyecto, pero no se percibia plenamente lograda. La coherencia entre el objetivo emocional que se quiere generar y las decisiones visuales es un area de profundizacion continua en diseno de experiencias.\n\nSobre la escalabilidad operativa: se pregunto como se atenderia la demanda digital de forma sostenida con solo dos asesoras. El equipo confirmo una hoja de ruta con IA conversacional para escalar la atencion. Al no haberse presentado en la defensa, quedo como un elemento que el jurado tuvo que extraer mediante pregunta directa. En una proxima iteracion, el plan de escalamiento deberia ser parte del relato principal.",
+    "pf_director": "El ajuste entre la presentacion de practica y la final fue significativo. Pasar de slides muy densos a un relato mas limpio fue la decision correcta: lo que va en un reporte escrito no es lo mismo que lo que va en una presentacion de doce minutos.\n\nUna de las mejores decisiones del relato fue conectar cada decision de diseno con su hallazgo de investigacion: hicimos esto asi porque nos dimos cuenta de esto. Esa estructura de evidencia hacia decision es la forma en que un magister en diseno de experiencias debe comunicar su trabajo, no solo en la defensa sino en cualquier contexto profesional.\n\nUn aspecto por trabajar: una muletilla repetitiva rompia el ritmo de la presentacion. Es un reflejo de los nervios que se amplifica bajo presion, pero que con practica deliberada se puede controlar.\n\nEl diferencial frente a otras plataformas quedo como un manto de duda al final. Esa pregunta podia haberse anticipado: las decisiones de arquitectura de informacion adaptadas al fisioterapeuta son el diferenciador mas concreto y defendible, y podrian haberse contrastado explicita mente con lo que ofrece cualquier e-commerce generico.",
+    "doc_logros": "El documento es claro, bien desarrollado, con muy pocos errores de estilo y una estructura solida. La honestidad al reconocer la ausencia de punto base de medicion, justificandola apropiadamente, demuestra madurez argumentativa.",
+    "doc_mejora": "Para completar la credibilidad del producto digital, el sitio web debe percibirse completo: fotos de testimonios personalizadas, imagenes de consumibles actualizadas, precios de referencia y el filtro de la categoria Tecarterapia en el catalogo.",
+    "tutor_logros": "El tutor valoro el proceso de diseno, especialmente el trabajo de interfaces y la coherencia visual. Los criterios de investigacion y etica obtuvieron las puntuaciones mas altas.",
+    "tutor_mejora": "La estrategia de medicion fue el criterio con menor puntuacion. Fortalecer los indicadores con metricas de seguimiento post-lanzamiento haria el proyecto mas robusto para una etapa de escalamiento."
+  },
+  "Servicios financieros de vivienda del FNA": {
+    "pf_jurados": "El proyecto fue valorado positivamente. El jurado destaco el uso de multiples metodologias de investigacion para construir una vision holistica del problema, senalando que ese enfoque corresponde a un proyecto de maestria.\n\nLa pregunta mas relevante fue sobre objetividad y sesgos: dado que el proyecto nacio de una experiencia personal, como garantizaban que el estudio no cayera en sesgo de confirmacion? El equipo respondio con solidez: las entrevistas iniciales se hicieron con personas con experiencia directa o frustrada con el FNA, independientemente de la vivencia personal del equipo. Esa distincion entre el punto de partida y el proceso de validacion es clave en investigacion en diseno y quedo bien argumentada.\n\nUn comentario que quedo abierto: los indicadores de exito propuestos (reduccion del 10% en consultas presenciales, aumento del 10% en afiliaciones en linea) son metas razonables, pero para ser defendibles en un contexto institucional real necesitarian estar sustentados en una linea base medida. Ese es el paso siguiente si el proyecto avanza hacia implementacion.",
+    "pf_director": "El storytelling inicial, narrar la historia de Luisa como usuaria que choca con la barrera digital del FNA, fue una de las mejores aperturas del ciclo. Esa tecnica cumple varias funciones a la vez: contextualiza el problema, genera empatia y justifica por que el diseno importa. Es una herramienta que vale la pena capitalizar en el ejercicio profesional.\n\nLa decision de hacer un rediseno inteligente, no un rediseno total, fue acertada y bien argumentada. Un rediseno total es costoso en recursos y en readaptacion del usuario; intervenir puntualmente en arquitectura de informacion, simulador y lenguaje fue estrategicamente responsable.\n\nUn numero concreto habria fortalecido la presentacion de la arquitectura mejorada: pasar de cinco clics a tres clics para llegar a la informacion clave no es solo una metrica defendible, es una forma inmediata de hacer visible la mejora para cualquier audiencia.\n\nEn la sesion de preguntas, al responder sobre la ensenanza de los resultados, el equipo respondio con la justificacion en lugar de la conclusion. Lo que se esperaba era algo como: la ensenanza es que esta variable ayuda, pero no es determinante por si sola; para confirmar su impacto real necesitariamos una medicion mas robusta y longitudinal. Distinguir entre justificar un resultado y concluir sobre el es una habilidad de pensamiento critico que se desarrolla con practica.",
+    "doc_logros": "El documento muestra una intencion clara de desarrollo y un trabajo solido de contextualizacion del reto de los usuarios en el acceso a servicios financieros de vivienda. La consideracion de impactos eticos fue valorada positivamente.",
+    "doc_mejora": "El objetivo del proyecto nunca se explicita con claridad: mejorar el acceso al credito, facilitar solicitudes o descongestionar el canal presencial? La hipotesis de desarrollo es vaga y mucha de la evidencia no es concluyente sobre las decisiones de diseno. Una reescritura de la introduccion y los objetivos daria una base mucho mas solida.",
+    "tutor_logros": "Obtuviste la nota maxima del tutor (5.0), con todos los criterios evaluados en el nivel mas alto. El proceso de diseno, la coherencia metodologica y la comunicacion oral fueron reconocidos como fortalezas sobresalientes.",
+    "tutor_mejora": "La brecha entre la nota del tutor (5.0) y la del documento (3.8) senala una oportunidad clara: el rigor que demuestran en la practica y en la presentacion debe reflejarse con mayor claridad en el reporte escrito, especialmente en la claridad de objetivos y la solidez de la evidencia presentada."
+  },
+  "Figatech adopción y escalabilidad operativa": {
+    "pf_jurados": "El proyecto fue reconocido como uno de los mas solidos del ciclo, con un ciclo completo de diagnostico, diseno, validacion e impacto medible. Las preguntas del jurado se orientaron principalmente a un aspecto.\n\nSobre la integracion de inteligencia artificial en el proceso: se pregunto como podria incorporarse IA dado que la empresa tiene procesos que siguen siendo muy humanos. El equipo reconocio que hay funciones que no se reemplazan, pero la respuesta quedo en un nivel general. Para futuras versiones del proyecto o propuestas al cliente, nombrar concretamente en cuales funcionalidades especificas aportaria IA, y en cuales no, hace la propuesta mas creible y mas accionable.",
+    "pf_director": "Fue evidente que el equipo dominaba el proyecto en profundidad y que cada integrante tenia claridad sobre su parte del relato. Se noto que una parte del equipo tenia mayor dominio del dato cuantitativo, lo que le dio solidez a la argumentacion. La otra integrante entro con claridad y fluidez, y eso se percibio.\n\nLa decision de mostrar un rediseno especifico, no total, fue una eleccion inteligente. Mostrar el mapa de arquitectura antes y despues es exactamente el tipo de evidencia visual que permite a un jurado entender la mejora sin navegar el prototipo completo. Si se le hubiera anadido un numero concreto, pasamos de X a Y clics, la mejora habria quedado aun mas contundente.\n\nLa pregunta sobre IA fue bien manejada en terminos generales, pero la respuesta ganaba en contundencia si se bajaba a ejemplos especificos: en la funcionalidad de onboarding la IA puede guiar al usuario paso a paso; en la gestion de garantias el proceso sigue siendo humano porque requiere validacion documental. Ir a lo concreto siempre es una mejor defensa que quedarse en el principio general.",
+    "doc_logros": "El documento es uno de los mejor construidos del cohorte: se lee con fluidez, cierra el argumento completo y reconoce sus limitaciones con madurez investigativa. El soporte cuantitativo con datos antes y despues le da una solidez argumentativa muy convincente.",
+    "doc_mejora": "Errores de edicion en un documento de grado restan credibilidad: errores de digitacion en las conclusiones, referencias duplicadas, terminos mal escritos y discrepancias entre texto y apendices en el numero de participantes por grupo. Una revision final de carpinteria es obligatoria antes de cualquier entrega definitiva.",
+    "tutor_logros": "Obtuviste la nota maxima del tutor (5.0). Todos los criterios fueron evaluados en el nivel mas alto, reconociendo el rigor metodologico, la calidad del prototipo y la coherencia del proceso de diseno.",
+    "tutor_mejora": "Mantener este nivel en la publicacion final requiere que la discusion profundice en por que funcionaron las soluciones especificas, no solo en que funcionaron. Ese es el aporte transferible a otros contextos fintech."
+  },
+  "Boletines Agroclimáticos": {
+    "pf_jurados": "La sesion de preguntas fue desafiante. El equipo estuvo titubeante al responder, buscando apoyo mutuo, y les costo encontrar el hilo. Lo lograron sacar adelante, pero la respuesta no fue tan solida como el proyecto lo merecia.\n\nEl comentario mas relevante giro en torno a la ensenanza de los resultados: cuando se pregunto que aprendizaje dejaba la medicion de comprension, el equipo respondio con la justificacion de por que paso, en lugar de la conclusion de que significa. La respuesta esperada habria sido: nos indica que esta variable contribuye, pero no es suficiente por si sola; un paso siguiente seria identificar con mayor precision que esta funcionando para hacer una medicion mas contundente. Distinguir entre justificar un resultado y concluir sobre el es una habilidad central en investigacion aplicada.",
+    "pf_director": "De todas las presentaciones del ciclo, esta fue la que mas claramente comunico el framework. La estructura de mostrar primero el estado actual y luego la transformacion logro que el jurado entendiera la logica del Marco Campo Claro sin necesidad de contexto previo.\n\nEl planteamiento multiusuario, tecnico agricola y productor como perfiles con necesidades distintas, fue un acierto comunicativo. Haber dejado claro desde el inicio que habia dos perfiles con fricciones especificas le dio mayor peso y relevancia a la solucion.\n\nEl problema tuvo su momento protagonico al inicio, y eso es fundamental. En diseno de experiencias el problema siempre debe aparecer antes que la solucion; eso hace que el jurado vea UX genuino y no solo entrega de pantallas.\n\nUn area de mejora: al explicar el framework, falto un apoyo visual que siguiera la secuencia paso a paso. El relato era claro, pero una visualizacion que mostrara que tipo de informacion o decision correspondia a cada etapa habria facilitado que el jurado siguiera la logica sin tener que reconstruirla mentalmente.\n\nUno de los hallazgos mas valiosos del proyecto es haber descubierto que el problema real no era el diseno del boletin final, sino el proceso de produccion y redaccion tecnica. Redirigir un proyecto cuando se descubre que no se estaba resolviendo el problema correcto es una de las decisiones mas dificiles y mas honestas en diseno. Esa capacidad de reconocer y corregir el foco es exactamente lo que diferencia a un magister en diseno de experiencias de alguien que simplemente ejecuta lo que le piden.",
+    "doc_logros": "El documento cierra bien el circulo metodologico y muestra honestidad al reconocer que el vocabulario contextualizado fallo cuando los usuarios no lo encontraban solos. Esa honestidad argumentativa eleva la calidad del reporte.",
+    "doc_mejora": "Hay una inconsistencia entre las conclusiones y el cuerpo del documento: se recomienda un checklist que bloquee la publicacion si faltan reglas, pero paginas antes se indica que esa funcionalidad ya habia sido implementada en el prototipo de alta fidelidad. Una revision de consistencia interna fortaleceria mucho el documento final.",
+    "tutor_logros": "El tutor reconocio el proceso de diseno centrado en el usuario y la atencion al detalle metodologico. Obtuviste una de las evaluaciones mas altas del grupo en criterios como identificacion del problema y etica del diseno.",
+    "tutor_mejora": "La estrategia de medicion fue el criterio con menor puntaje del tutor. Para la siguiente fase, consolida indicadores de seguimiento longitudinal que vayan mas alla del contexto de prueba controlada."
+  }
+};
+const rubrics={
+  "Nexus Ecosistema digital": {
+    "pf_criteria": [
+      {
+        "name": "Identificación del problema y actores",
+        "score": 3.33,
+        "text": "El equipo identificó con claridad los actores del sistema de casas y comprendió sus roles e interrelaciones. El proceso investigativo fue sólido, aunque la articulación explícita entre hallazgos de investigación y decisiones de diseño podría reforzarse."
+      },
+      {
+        "name": "Mapeo de la experiencia",
+        "score": 3.33,
+        "text": "Los dolores y fricciones del sistema quedaron bien evidenciados a través del Service Blueprint. La oportunidad está en conectar más explícitamente cada hallazgo de mapeo con cada decisión de diseño tomada."
+      },
+      {
+        "name": "Diseño de interfaces",
+        "score": 3.67,
+        "text": "Las interfaces comunican bien la lógica del ecosistema. La solución de dos superficies —pantalla institucional y app de gestión— fue un acierto contextualmente pertinente y bien ejecutado visualmente."
+      },
+      {
+        "name": "Prototipado e iteración",
+        "score": 3.33,
+        "text": "El prototipo mostró los flujos principales con suficiente fidelidad. Dado el tamaño del ecosistema, darle más tiempo en pantalla durante la presentación habría permitido al jurado apreciar su alcance real."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 2.67,
+        "text": "La conveniencia de la solución para el caso del Colegio Benet está bien argumentada. La viabilidad de escalar hacia otros contextos institucionales —el modelo de negocio y el plan de transición— necesita mayor desarrollo para ser convincente."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 2.67,
+        "text": "Los indicadores propuestos conectan con los hallazgos iniciales (participación, percepción de justicia, adopción), pero permanecen en un nivel general. Para una implementación real, cada flujo debería tener métricas propias y verificables."
+      },
+      {
+        "name": "Comunicación oral",
+        "score": 3.67,
+        "text": "La presentación fue fluida y bien distribuida entre los integrantes. El inicio fue contundente. La sesión de preguntas mostró dominio del proyecto, con un breve momento de vacilación en la primera respuesta que se resolvió bien."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 3.33,
+        "text": "El equipo consideró el impacto social en términos de inclusión y participación estudiantil. Cabría profundizar en cómo la gamificación puede generar exclusión si no se acompaña de una gestión intencional de la diversidad de talentos."
+      }
+    ],
+    "doc_criteria": [
+      {
+        "name": "Resumen ejecutivo",
+        "score": 4,
+        "text": "El resumen comunica con claridad el propósito, los hallazgos y las recomendaciones del proyecto. Está bien organizado y adaptado a la audiencia."
+      },
+      {
+        "name": "Introducción",
+        "score": 4,
+        "text": "El contexto del problema está bien planteado y los objetivos son precisos y pertinentes. La relevancia del proyecto queda justificada desde el inicio."
+      },
+      {
+        "name": "Metodología",
+        "score": 3,
+        "text": "El proceso de trabajo está descrito con claridad básica. Los roles del equipo y la justificación de las herramientas utilizadas podrían detallarse más para reflejar el nivel de trabajo colaborativo realizado."
+      },
+      {
+        "name": "Resultados y evidencia visual",
+        "score": 3,
+        "text": "Los hallazgos son comprensibles pero la evidencia visual es limitada. La ausencia de pantallas o enlace funcional al prototipo es la brecha más significativa: dificulta verificar las aseveraciones sobre la solución."
+      },
+      {
+        "name": "Discusión y reflexión crítica",
+        "score": 2,
+        "text": "El documento describe lo que se hizo pero no analiza críticamente qué funcionó, por qué, ni cuáles son las limitaciones reales de la propuesta. La reflexión crítica es la sección con mayor margen de mejora."
+      },
+      {
+        "name": "Conclusiones y recomendaciones",
+        "score": 3,
+        "text": "Las conclusiones son pertinentes pero generales. Las recomendaciones podrían ser más específicas y accionables para quien quiera dar continuidad o implementar el sistema en otro contexto."
+      },
+      {
+        "name": "Comunicación escrita",
+        "score": 3,
+        "text": "La redacción es adecuada y tiene estructura lógica. Varios tramos resultan escuetos y podrían desarrollarse con mayor profundidad argumentativa para hacer justicia al alcance real del proyecto."
+      },
+      {
+        "name": "Identificación de roles del equipo",
+        "score": 3,
+        "text": "Los roles se mencionan pero de forma superficial. Una descripción más detallada de cómo se distribuyó el trabajo y cómo se tomaron decisiones conjuntas fortalecería esta sección."
+      },
+      {
+        "name": "Referencias APA",
+        "score": 3,
+        "text": "Las referencias son pertinentes y mayormente correctas. Deben organizarse alfabéticamente y revisarse algunos errores menores de formato APA."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 2,
+        "text": "El documento no aborda con suficiente profundidad los posibles impactos éticos de gamificar un sistema de convivencia escolar, ni considera cómo la solución podría afectar a actores con menor acceso tecnológico."
+      }
+    ],
+    "tutor_criteria": [
+      {
+        "name": "Identifica el problema y actores",
+        "score": 4,
+        "text": "El tutor reconoce que el equipo comprendió el sistema de casas como un problema complejo con múltiples actores interdependientes, y lo abordó con rigor metodológico desde la investigación."
+      },
+      {
+        "name": "Mapea la experiencia",
+        "score": 4,
+        "text": "El mapeo de dolores, fricciones y oportunidades fue completo y bien estructurado. El Service Blueprint funcionó como pieza central que ordenó el diagnóstico y guió el diseño de la solución."
+      },
+      {
+        "name": "Diseña interfaces digitales",
+        "score": 4,
+        "text": "Las interfaces comunican con coherencia visual y responden a decisiones de diseño bien fundamentadas. El ecosistema de dos superficies es estéticamente consistente y funcionalmente pertinente."
+      },
+      {
+        "name": "Prototipa soluciones",
+        "score": 3,
+        "text": "El prototipo muestra los flujos principales con suficiente claridad. El tutor señala que el nivel de fidelidad y el alcance de las iteraciones podrían haberse ampliado dado el tamaño del ecosistema propuesto."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 4,
+        "text": "La solución es deseable para los actores del colegio y factible técnicamente. La viabilidad hacia otros contextos es una oportunidad de desarrollo en la siguiente etapa del proyecto."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 4,
+        "text": "El tutor valora que el equipo haya propuesto indicadores conectados con el problema original. El paso siguiente es aterrizarlos a métricas concretas y medibles por flujo e interacción."
+      },
+      {
+        "name": "Comunicación oral del proceso",
+        "score": 4,
+        "text": "La comunicación oral del proceso de diseño fue clara, bien estructurada y adaptada a la audiencia académica. El equipo demostró dominio del relato de su proyecto."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El tutor reconoce la consideración del impacto social en la participación estudiantil como eje central de la propuesta. La solución fue concebida con conciencia de sus efectos en la comunidad escolar."
+      }
+    ]
+  },
+  "Rediseño de la experiencia del emprendedor - Icesi Emprende": {
+    "pf_criteria": [
+      {
+        "name": "Identificación del problema y actores",
+        "score": 3,
+        "text": "El equipo identificó correctamente el problema de visibilidad y conexión dentro del ecosistema emprendedor de Icesi, y mapeó con claridad los actores involucrados. La profundidad del análisis del ecosistema fue reconocida como la fortaleza más distintiva del proyecto."
+      },
+      {
+        "name": "Mapeo de la experiencia",
+        "score": 3,
+        "text": "El mapeo de la experiencia del emprendedor reveló fricciones concretas: invisibilidad, procesos de postulación confusos y falta de conexión entre actores. La conexión entre estos dolores y las decisiones de diseño podría articularse con mayor explicitud."
+      },
+      {
+        "name": "Diseño de interfaces",
+        "score": 2.67,
+        "text": "Las interfaces presentadas resuelven la navegación y el registro, pero el nivel estético y la atención al detalle visual tienen margen de desarrollo. La evidencia visual de la solución —capturas del prototipo— estuvo ausente en la presentación y en el documento."
+      },
+      {
+        "name": "Prototipado e iteración",
+        "score": 2.67,
+        "text": "El proceso de iteración con cinco usuarios por ronda fue metodológicamente correcto para pruebas de usabilidad. Sin embargo, mostrar la evolución entre versiones con más claridad visual habría fortalecido el argumento de mejora progresiva."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 3.67,
+        "text": "La propuesta de valor es clara: una plataforma que conecta emprendedores con oportunidades y compradores potenciales dentro de la comunidad Icesi. El potencial de escalamiento al ecosistema institucional completo es uno de los puntos más sólidos del proyecto."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 2.67,
+        "text": "Los indicadores de éxito (claridad, participación, conexión) están bien identificados conceptualmente, pero su operacionalización es débil. La métrica de 'conexión' generó preguntas en el jurado que requirieron aclaración posterior."
+      },
+      {
+        "name": "Comunicación oral",
+        "score": 4,
+        "text": "La comunicación oral fue uno de los puntos más altos del proyecto. El relato fue claro, bien estructurado y adaptado a la audiencia. La presentación anticipó varias de las posibles preguntas del jurado dentro del propio discurso."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 3.67,
+        "text": "El proyecto consideró el impacto social en términos de inclusión de emprendedores de distintos perfiles y la generación de oportunidades reales. La dimensión ética estuvo presente como parte del argumento de valor de la solución."
+      }
+    ],
+    "doc_criteria": [
+      {
+        "name": "Resumen ejecutivo",
+        "score": 4,
+        "text": "El resumen ejecutivo es claro, sintético y bien organizado. Comunica el propósito del proyecto, los hallazgos principales y las recomendaciones de forma apropiada para la audiencia."
+      },
+      {
+        "name": "Introducción",
+        "score": 3,
+        "text": "El contexto y el problema están presentados de forma adecuada, aunque la relevancia institucional del proyecto podría destacarse con mayor contundencia desde las primeras líneas."
+      },
+      {
+        "name": "Metodología",
+        "score": 3,
+        "text": "La metodología describe el proceso con claridad básica. Los roles del equipo están mencionados, aunque una descripción más detallada de la distribución del trabajo y las herramientas usadas enriquecería esta sección."
+      },
+      {
+        "name": "Resultados y evidencia visual",
+        "score": 3,
+        "text": "Los hallazgos de las pruebas de usabilidad están documentados y son comprensibles. La ausencia total de capturas del prototipo —ni una sola pantalla— es la omisión más significativa del documento para un proyecto de diseño digital."
+      },
+      {
+        "name": "Discusión y reflexión crítica",
+        "score": 3,
+        "text": "La discusión conecta los resultados con el problema identificado. Podría profundizar más en las limitaciones del estudio, especialmente el tamaño de muestra y los alcances reales de las pruebas con cinco usuarios por iteración."
+      },
+      {
+        "name": "Conclusiones y recomendaciones",
+        "score": 4,
+        "text": "Las conclusiones son claras y están conectadas con los resultados. Las recomendaciones son pertinentes y ofrecen una hoja de ruta concreta para la siguiente fase del proyecto dentro de Icesi."
+      },
+      {
+        "name": "Comunicación escrita",
+        "score": 4,
+        "text": "La redacción es impecable: tono profesional, lenguaje adaptado al lector académico y estructura coherente a lo largo de todo el documento. Es uno de los mejor escritos del cohorte."
+      },
+      {
+        "name": "Identificación de roles del equipo",
+        "score": 4,
+        "text": "Los roles del equipo y las dinámicas colaborativas están descritos con detalle y claridad. Se evidencia una reflexión genuina sobre el proceso de trabajo conjunto."
+      },
+      {
+        "name": "Referencias APA",
+        "score": 4,
+        "text": "Las referencias son pertinentes, actualizadas y están citadas correctamente en formato APA a lo largo de todo el documento."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El proyecto considera de forma explícita los impactos éticos y sociales de la solución, especialmente en relación con la inclusión de emprendedores de distintos perfiles y el acceso equitativo a oportunidades institucionales."
+      }
+    ],
+    "tutor_criteria": [
+      {
+        "name": "Identifica el problema y actores",
+        "score": 4,
+        "text": "El tutor reconoce que el equipo identificó con rigor el problema de fondo: no la falta de emprendimientos, sino la invisibilidad y la desconexión dentro del ecosistema Icesi. Ese diagnóstico preciso es el cimiento del proyecto."
+      },
+      {
+        "name": "Mapea la experiencia",
+        "score": 4,
+        "text": "El mapeo de la experiencia del emprendedor reveló fricciones concretas y bien documentadas. El journey desde el registro hasta la postulación y la visibilidad fue la pieza investigativa más sólida del trabajo."
+      },
+      {
+        "name": "Diseña interfaces digitales",
+        "score": 4,
+        "text": "Las interfaces digitales fueron diseñadas con coherencia visual y con decisiones de UX bien fundamentadas en los hallazgos. El sistema de dos vistas —emprendedor y comprador— responde directamente a las necesidades identificadas."
+      },
+      {
+        "name": "Prototipa soluciones",
+        "score": 4,
+        "text": "El proceso de prototipado e iteración fue riguroso: usuarios únicos entre rondas, mejoras documentadas entre versiones y métricas de usabilidad que evidencian progreso real."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 4,
+        "text": "La solución es factible, viable institucionalmente y deseable para los emprendedores. La visión de escalamiento al ecosistema completo de Icesi demuestra pensamiento estratégico más allá del alcance inmediato del proyecto."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 3,
+        "text": "Los indicadores de éxito propuestos son relevantes pero necesitan mayor especificidad para ser medibles en una implementación real. El dashboard de administración es un paso en la dirección correcta."
+      },
+      {
+        "name": "Comunicación oral del proceso",
+        "score": 4,
+        "text": "La comunicación oral del proceso fue clara, confiada y bien adaptada a la audiencia. El equipo demostró dominio del proyecto y capacidad para responder preguntas con solidez."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El tutor reconoce la consideración de impactos éticos y sociales como una dimensión presente en las decisiones del proyecto, especialmente en lo relacionado con la inclusión y la equidad de acceso."
+      }
+    ]
+  },
+  "FisioMesa Fisioterapia Privada": {
+    "pf_criteria": [
+      {
+        "name": "Identificación del problema y actores",
+        "score": 3.33,
+        "text": "El problema de la empresa —escalar la llegada a fisioterapeutas con solo dos asesoras comerciales— fue identificado con claridad. Los actores (asesoras, fisioterapeutas, gerencia) y sus roles quedaron bien definidos en la presentación."
+      },
+      {
+        "name": "Mapeo de la experiencia",
+        "score": 3.33,
+        "text": "El mapeo de la experiencia del fisioterapeuta como cliente reveló fricciones concretas: comunicación por WhatsApp, PDFs como catálogos, ausencia de autonomía en la consulta. La conexión entre esos dolores y las decisiones de diseño fue razonablemente explícita."
+      },
+      {
+        "name": "Diseño de interfaces",
+        "score": 3,
+        "text": "Las interfaces presentadas organizan bien el catálogo y la guía por perfil clínico. El nivel estético fue reconocido como un punto de partida sólido, aunque el jurado señaló que la capa emocional —confianza, enganche— no se percibía plenamente lograda en la ejecución visual."
+      },
+      {
+        "name": "Prototipado e iteración",
+        "score": 3.33,
+        "text": "El proceso de prototipado mostró iteraciones con usuarios fisioterapeutas y evidenció mejoras concretas. El uso de mapas de calor como evidencia de validación fue valorado como un recurso visual pertinente."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 3.33,
+        "text": "La solución es factible para el contexto de la empresa y deseable para los fisioterapeutas. La viabilidad de escalar a toda Costa Rica —el mercado real objetivo— fue planteada pero requiere un plan operativo más desarrollado, especialmente en la atención 7×24."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 3,
+        "text": "La estrategia de medición estuvo presente pero fue uno de los puntos con menor desarrollo. Las métricas de impacto mencionadas suenan bien, pero sin una línea base documentada su interpretación queda abierta a cuestionamientos."
+      },
+      {
+        "name": "Comunicación oral",
+        "score": 3.33,
+        "text": "La presentación fue fluida y se notó preparada. El ajuste entre la sesión de práctica y la presentación final fue significativo. La narrativa mejoró notablemente al conectar cada decisión de diseño con su hallazgo de investigación."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 3.67,
+        "text": "El proyecto consideró los impactos éticos en términos del bienestar del fisioterapeuta y la calidad de la atención clínica. La dimensión de confianza como valor central de la solución refleja una conciencia del impacto sobre el usuario final."
+      }
+    ],
+    "doc_criteria": [
+      {
+        "name": "Resumen ejecutivo",
+        "score": 4,
+        "text": "El resumen ejecutivo es claro, bien estructurado y comunica con precisión el propósito del proyecto, los hallazgos y las recomendaciones. Uno de los mejores del cohorte en este criterio."
+      },
+      {
+        "name": "Introducción",
+        "score": 4,
+        "text": "La introducción contextualiza el problema con claridad y define objetivos precisos. La relevancia del proyecto para la empresa está bien justificada desde las primeras páginas."
+      },
+      {
+        "name": "Metodología",
+        "score": 4,
+        "text": "La metodología describe con precisión el proceso de trabajo, los roles del equipo, las herramientas utilizadas y las fases del proyecto. Refleja un trabajo colaborativo bien organizado."
+      },
+      {
+        "name": "Resultados y evidencia visual",
+        "score": 4,
+        "text": "Los resultados son relevantes y están respaldados con evidencia visual de calidad, incluyendo mapas de calor. El análisis de los hallazgos es sólido y bien conectado con las decisiones de diseño."
+      },
+      {
+        "name": "Discusión y reflexión crítica",
+        "score": 3,
+        "text": "La discusión presenta los hallazgos con lógica pero podría profundizar más en el análisis crítico. En particular, la ausencia de una línea base de medición —aunque se justifica apropiadamente— limita la contundencia de las conclusiones de impacto."
+      },
+      {
+        "name": "Conclusiones y recomendaciones",
+        "score": 4,
+        "text": "Las conclusiones son claras y están conectadas con los resultados del proyecto. Las recomendaciones son aplicables y ofrecen una hoja de ruta concreta para la implementación y el escalamiento."
+      },
+      {
+        "name": "Comunicación escrita",
+        "score": 4,
+        "text": "La redacción es limpia, profesional y coherente a lo largo del documento. Muy pocos errores de estilo. El tono es apropiado para un documento de grado de maestría."
+      },
+      {
+        "name": "Identificación de roles del equipo",
+        "score": 4,
+        "text": "Los roles del equipo y las dinámicas de trabajo colaborativo están descritos con detalle. Se evidencia una reflexión genuina sobre cómo se organizó el proceso de diseño."
+      },
+      {
+        "name": "Referencias APA",
+        "score": 4,
+        "text": "Las referencias son pertinentes, actualizadas y están correctamente citadas en formato APA en todo el documento."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El proyecto considera de forma explícita los impactos éticos del diseño, especialmente en relación con la confianza del fisioterapeuta, la calidad del asesoramiento y el bienestar del paciente final."
+      }
+    ],
+    "tutor_criteria": [
+      {
+        "name": "Identifica el problema y actores",
+        "score": 4,
+        "text": "El tutor reconoce que el equipo comprendió con profundidad el problema de escalamiento comercial de la empresa y lo abordó desde una perspectiva centrada en el usuario —el fisioterapeuta— y no solo desde el negocio."
+      },
+      {
+        "name": "Mapea la experiencia",
+        "score": 4,
+        "text": "El mapeo de la experiencia fue completo y bien documentado. Los dolores identificados (dependencia de WhatsApp, ausencia de autonomía, falta de confianza digital) son directamente trazables a las decisiones de diseño de la solución."
+      },
+      {
+        "name": "Diseña interfaces digitales",
+        "score": 3,
+        "text": "Las interfaces digitales están bien concebidas y organizan el catálogo de forma pertinente para el perfil clínico del fisioterapeuta. El tutor señala que la capa de confianza visual —objetivo central del proyecto— tiene margen de mejora en la ejecución estética."
+      },
+      {
+        "name": "Prototipa soluciones",
+        "score": 4,
+        "text": "El proceso de prototipado e iteración fue riguroso y estuvo bien documentado. Las pruebas con usuarios del perfil correcto (fisioterapeutas) le dan validez al proceso de validación realizado."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 4,
+        "text": "La solución es factible para el contexto actual de la empresa y deseable para los fisioterapeutas. La hoja de ruta hacia IA conversacional y e-commerce de consumibles demuestra visión de escalamiento coherente con el negocio."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 3,
+        "text": "La estrategia de medición está presente pero necesita indicadores más específicos y una línea base documentada para que las métricas de impacto sean defendibles en un contexto de implementación real."
+      },
+      {
+        "name": "Comunicación oral del proceso",
+        "score": 4,
+        "text": "La comunicación oral fue clara y demostró un nivel de compromiso con el proyecto que va más allá del encargo académico. La narrativa mejoró significativamente entre la presentación de práctica y la final."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El tutor reconoce la consideración de los impactos éticos en términos del bienestar del fisioterapeuta, la calidad de la asesoría y la responsabilidad hacia el paciente final como usuario indirecto de la solución."
+      }
+    ]
+  },
+  "Servicios financieros de vivienda del FNA": {
+    "pf_criteria": [
+      {
+        "name": "Identificación del problema y actores",
+        "score": 3.5,
+        "text": "El problema fue identificado con claridad y sustentado en datos reales: lenguaje financiero complejo, arquitectura de navegación caótica y un simulador débil como barreras de entrada. Los actores (afiliados, asesores, institución) y sus tensiones quedaron bien definidos."
+      },
+      {
+        "name": "Mapeo de la experiencia",
+        "score": 3.75,
+        "text": "El mapeo de la experiencia fue uno de los puntos más sólidos del proyecto. El recorrido del usuario desde la motivación inicial hasta el abandono del canal digital quedó documentado con precisión y con evidencia de múltiples métodos (mistery shopper, safari, entrevistas, auditoría heurística)."
+      },
+      {
+        "name": "Diseño de interfaces",
+        "score": 3.25,
+        "text": "Las interfaces rediseñadas muestran mejoras claras en arquitectura de información, lenguaje claro y simulador contextualizado. El jurado señaló que el mapeo de la nueva arquitectura fue el entregable visual más contundente, aunque la nota de interfaces refleja que la ejecución podría profundizarse."
+      },
+      {
+        "name": "Prototipado e iteración",
+        "score": 3.5,
+        "text": "El proceso de prototipado evidenció mejoras medibles entre la versión de baja y alta fidelidad: tiempos de respuesta que bajaron de seis minutos a uno y medio, y tasas de éxito que pasaron del 20% al 92%. Esa evidencia cuantitativa fue uno de los argumentos más sólidos de la presentación."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 3.75,
+        "text": "La propuesta de valor es clara: reducir la dependencia del canal presencial y aumentar la autonomía del afiliado. La decisión de hacer un rediseño inteligente —no total— fue estratégicamente responsable y bien recibida por el jurado."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 3.75,
+        "text": "Los indicadores de éxito (reducción del 10% en consultas presenciales, aumento del 10% en afiliaciones en línea) son razonables. Su solidez aumentaría si estuvieran sustentados en una línea base medida, que es el paso siguiente hacia la implementación."
+      },
+      {
+        "name": "Comunicación oral",
+        "score": 3.75,
+        "text": "La comunicación oral fue una de las fortalezas del equipo. El storytelling inicial —narrar la historia personal de Luisa como usuaria— fue una de las mejores aperturas del ciclo de presentaciones. La respuesta en la sesión de preguntas fue sólida aunque con oportunidad de mejora en articular conclusiones vs. justificaciones."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 3.75,
+        "text": "El proyecto consideró de forma explícita los impactos éticos del diseño: inclusión financiera de estratos 1, 2 y 3, autonomía del usuario en decisiones de crédito, y reducción de la dependencia de intermediarios presenciales."
+      }
+    ],
+    "doc_criteria": [
+      {
+        "name": "Resumen ejecutivo",
+        "score": 4,
+        "text": "El resumen ejecutivo comunica con claridad el propósito del proyecto y los hallazgos principales. Está bien organizado y adaptado a la audiencia institucional."
+      },
+      {
+        "name": "Introducción",
+        "score": 2,
+        "text": "La introducción no explicita con suficiente claridad el objetivo del proyecto. No queda claro si se busca mejorar el acceso al crédito, facilitar las solicitudes o descongestionar el canal presencial. La hipótesis de desarrollo es vaga y necesita una reescritura que ancle el proyecto a un objetivo verificable."
+      },
+      {
+        "name": "Metodología",
+        "score": 2,
+        "text": "La descripción de la metodología no detalla lo suficiente las actividades realizadas ni aporta evidencia concluyente sobre las decisiones de diseño tomadas. El proceso investigativo fue rico —múltiples métodos— pero el documento no lo refleja con la claridad que merece."
+      },
+      {
+        "name": "Resultados y evidencia visual",
+        "score": 3,
+        "text": "Los hallazgos presentados son comprensibles y están respaldados con datos del FNA. La evidencia visual es adecuada, aunque podría profundizarse en el análisis de cada método utilizado durante la investigación."
+      },
+      {
+        "name": "Discusión y reflexión crítica",
+        "score": 3,
+        "text": "La discusión conecta los resultados con el problema identificado con lógica básica. Podría ir más lejos en analizar críticamente qué limitaciones tienen las pruebas realizadas y qué significan realmente los porcentajes de mejora obtenidos."
+      },
+      {
+        "name": "Conclusiones y recomendaciones",
+        "score": 3,
+        "text": "Las conclusiones son pertinentes pero generales. Las recomendaciones son válidas aunque podrían ser más específicas en cuanto a los pasos concretos que el FNA debería seguir para implementar la solución."
+      },
+      {
+        "name": "Comunicación escrita",
+        "score": 3,
+        "text": "La redacción es adecuada y tiene estructura lógica. El tono es apropiado para el contexto institucional. Algunas secciones podrían desarrollarse con mayor profundidad para hacer justicia al alcance real del trabajo realizado."
+      },
+      {
+        "name": "Identificación de roles del equipo",
+        "score": 3,
+        "text": "Los roles del equipo se describen de forma correcta. Una reflexión más detallada sobre las dinámicas de trabajo y las decisiones tomadas en conjunto enriquecería esta sección."
+      },
+      {
+        "name": "Referencias APA",
+        "score": 3,
+        "text": "Las referencias son pertinentes y mayormente correctas en formato APA. Se recomiendan una revisión final de consistencia y completitud."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El proyecto considera de forma explícita los impactos éticos del diseño: inclusión financiera, acceso equitativo al crédito de vivienda y reducción de barreras para los sectores más vulnerables de la población afiliada al FNA."
+      }
+    ],
+    "tutor_criteria": [
+      {
+        "name": "Identifica el problema y actores",
+        "score": 4,
+        "text": "El tutor reconoce que el equipo identificó el problema correcto —la barrera digital del FNA como obstáculo de inclusión financiera— y lo documentó con solidez a través de múltiples métodos de investigación."
+      },
+      {
+        "name": "Mapea la experiencia",
+        "score": 4,
+        "text": "El mapeo de la experiencia fue completo, riguroso y apoyado en métodos complementarios. La trazabilidad entre los hallazgos y las decisiones de diseño es uno de los puntos más sólidos del proceso."
+      },
+      {
+        "name": "Diseña interfaces digitales",
+        "score": 4,
+        "text": "Las interfaces rediseñadas responden directamente a los hallazgos de investigación: lenguaje claro, arquitectura orientada a objetivos del usuario y simulador contextualizado. Las decisiones de diseño están bien fundamentadas."
+      },
+      {
+        "name": "Prototipa soluciones",
+        "score": 4,
+        "text": "El prototipo de alta fidelidad evidenció mejoras cuantitativas significativas frente al de baja fidelidad. Esa capacidad de medir el impacto del diseño con datos antes y después demuestra madurez metodológica."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 4,
+        "text": "La propuesta es factible para el FNA, viable institucionalmente y deseable para los afiliados. La decisión de rediseñar de forma selectiva —no total— es estratégicamente sólida y bien argumentada."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 4,
+        "text": "La estrategia de medición incluye indicadores claros y conectados con el problema. El tutor valora la propuesta, aunque señala que los indicadores necesitarían una línea base real para ser plenamente verificables."
+      },
+      {
+        "name": "Comunicación oral del proceso",
+        "score": 4,
+        "text": "La comunicación oral del proceso fue sobresaliente. El equipo demostró dominio del proyecto, claridad en el relato y capacidad de respuesta ante las preguntas del jurado."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El proyecto considera de forma explícita y consistente los impactos éticos del diseño, especialmente en relación con la inclusión financiera y la autonomía del usuario en decisiones de crédito."
+      }
+    ]
+  },
+  "Figatech adopción y escalabilidad operativa": {
+    "pf_criteria": [
+      {
+        "name": "Identificación del problema y actores",
+        "score": 3.75,
+        "text": "El problema de adopción de la plataforma Figatech por parte de los fideicomisarios fue identificado con rigor y bien documentado en la investigación. La distinción entre barreras de onboarding, de uso y de adopción es el tipo de precisión conceptual que caracteriza este proyecto."
+      },
+      {
+        "name": "Mapeo de la experiencia",
+        "score": 3.75,
+        "text": "El mapeo de la experiencia del fideicomisario reveló dolores concretos y verificables. El Service Blueprint y el análisis de grupos diferenciados (Grupo A y Grupo B) demostraron una lectura profunda de cómo distintos perfiles experimentan las mismas fricciones de forma diferente."
+      },
+      {
+        "name": "Diseño de interfaces",
+        "score": 3.5,
+        "text": "Las interfaces rediseñadas muestran coherencia visual y decisiones de UX bien fundamentadas. El jurado valoró el enfoque de rediseño selectivo —no total— como estratégicamente inteligente y como evidencia de criterio profesional maduro."
+      },
+      {
+        "name": "Prototipado e iteración",
+        "score": 3.75,
+        "text": "El proceso de prototipado e iteración fue uno de los más rigurosos del cohorte. La evidencia antes/después con grupos diferenciados, especialmente el hallazgo del Grupo B pasando de ser el peor en diagnóstico al 100% de éxito en el test final, es el argumento más contundente del proyecto."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 3.5,
+        "text": "La propuesta de valor está claramente articulada en términos de reducción de fricción en el onboarding y aumento de la autonomía del usuario dentro de la plataforma. La dimensión de viabilidad para el negocio de Figatech podría haberse desarrollado con más detalle."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 3,
+        "text": "La estrategia de medición fue el criterio con mayor dispersión entre evaluadores. Los indicadores están presentes pero necesitan mayor especificidad. La pregunta sobre IA en el proceso señaló una oportunidad de nombrar concretamente en qué funcionalidades la automatización sería aplicable."
+      },
+      {
+        "name": "Comunicación oral",
+        "score": 3.5,
+        "text": "La presentación fue sólida. Se notó que cada integrante tenía claridad sobre su parte del relato. La parte de datos cuantitativos fue especialmente convincente. La pregunta sobre IA fue bien manejada aunque con margen para mayor concreción."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 3.5,
+        "text": "El proyecto consideró los impactos éticos en términos del bienestar del fideicomisario como usuario y la responsabilidad de una plataforma financiera ante usuarios con menor alfabetización digital."
+      }
+    ],
+    "doc_criteria": [
+      {
+        "name": "Resumen ejecutivo",
+        "score": 4,
+        "text": "El resumen ejecutivo es claro, sintético y bien organizado. Comunica el ciclo completo del proyecto —diagnóstico, diseño, validación, impacto— de forma que cualquier lector puede entender el valor del trabajo."
+      },
+      {
+        "name": "Introducción",
+        "score": 4,
+        "text": "La introducción contextualiza el problema con claridad y precisión. Los objetivos son pertinentes y la relevancia del proyecto para el negocio de Figatech queda bien justificada desde las primeras páginas."
+      },
+      {
+        "name": "Metodología",
+        "score": 3,
+        "text": "La metodología está descrita con claridad básica. La justificación de las herramientas y fases podría ser más detallada, especialmente en lo relacionado con la conformación de los grupos diferenciados y los criterios de selección de participantes."
+      },
+      {
+        "name": "Resultados y evidencia visual",
+        "score": 4,
+        "text": "Los resultados son el punto más fuerte del documento: datos antes y después, grupos diferenciados, mejoras cuantificadas con métricas de usabilidad. La evidencia visual respalda las aseveraciones con solidez."
+      },
+      {
+        "name": "Discusión y reflexión crítica",
+        "score": 3,
+        "text": "La discusión conecta los resultados con el problema pero podría ir más lejos: ¿por qué funcionaron las soluciones específicas? Esa respuesta —el aporte transferible a otros contextos fintech— es donde está la contribución más valiosa del trabajo."
+      },
+      {
+        "name": "Conclusiones y recomendaciones",
+        "score": 3,
+        "text": "Las conclusiones son pertinentes y conectadas con los resultados. Las recomendaciones son válidas aunque podrían ser más específicas en cuanto a los pasos para implementar la solución en producción."
+      },
+      {
+        "name": "Comunicación escrita",
+        "score": 4,
+        "text": "La redacción es fluida, profesional y coherente. El documento se lee con gusto. La honestidad al reconocer las limitaciones del estudio —muestra pequeña, validación sobre prototipo— habla de madurez investigativa."
+      },
+      {
+        "name": "Identificación de roles del equipo",
+        "score": 4,
+        "text": "Los roles del equipo están descritos con detalle y se evidencia una dinámica colaborativa bien estructurada. La distribución del trabajo refleja el nivel de profundidad alcanzado en cada área del proyecto."
+      },
+      {
+        "name": "Referencias APA",
+        "score": 3,
+        "text": "Las referencias son pertinentes y mayormente correctas. Se detectaron algunas inconsistencias menores (referencia duplicada, errores de digitación) que deben corregirse antes de la entrega definitiva."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 3,
+        "text": "El proyecto considera aspectos éticos en la mayoría de las decisiones, especialmente en relación con la responsabilidad de una plataforma financiera ante usuarios con menor alfabetización digital. Podría profundizarse en las implicaciones del acceso diferenciado por tipo de usuario."
+      }
+    ],
+    "tutor_criteria": [
+      {
+        "name": "Identifica el problema y actores",
+        "score": 4,
+        "text": "El tutor reconoce que el equipo identificó el problema correcto —no el rediseño de la interfaz sino la fricción en el proceso de onboarding y adopción— y lo documentó con rigor metodológico."
+      },
+      {
+        "name": "Mapea la experiencia",
+        "score": 4,
+        "text": "El mapeo de la experiencia por grupos diferenciados fue una decisión metodológica inteligente que permitió evidenciar cómo distintos perfiles de usuario experimentan las mismas barreras de forma diferente."
+      },
+      {
+        "name": "Diseña interfaces digitales",
+        "score": 4,
+        "text": "Las interfaces rediseñadas son coherentes visualmente y responden a decisiones de UX bien fundamentadas en los hallazgos. El criterio de rediseño selectivo demuestra madurez profesional."
+      },
+      {
+        "name": "Prototipa soluciones",
+        "score": 4,
+        "text": "El proceso de prototipado e iteración fue el más riguroso del cohorte. La evidencia cuantitativa antes/después con grupos diferenciados es un estándar de validación que demuestra capacidad de medición del impacto del diseño."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 4,
+        "text": "La solución es factible técnicamente, viable para el negocio de Figatech y deseable para los fideicomisarios. El ciclo completo de diagnóstico a impacto medible es el aporte más valioso del proyecto."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 4,
+        "text": "La estrategia de medición está bien articulada y conectada con el problema original. Los indicadores de éxito son claros y la evidencia de impacto es sólida para el contexto de prototipo."
+      },
+      {
+        "name": "Comunicación oral del proceso",
+        "score": 4,
+        "text": "La comunicación oral del proceso fue sobresaliente. El equipo demostró dominio del proyecto, claridad en el relato y solidez en las respuestas. La capacidad de articular el proceso completo de forma convincente es una fortaleza profesional."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El tutor reconoce la consideración de impactos éticos en relación con la responsabilidad ante usuarios vulnerables en contextos financieros y la importancia de la transparencia en el diseño de plataformas de gestión de activos."
+      }
+    ]
+  },
+  "Boletines Agroclimáticos": {
+    "pf_criteria": [
+      {
+        "name": "Identificación del problema y actores",
+        "score": 3.67,
+        "text": "El equipo identificó el problema correcto: la brecha no estaba en el boletín final sino en el proceso de producción y redacción técnica. Esa capacidad de redirigir el foco del proyecto es uno de los hallazgos más valiosos y fue bien reconocida por el jurado."
+      },
+      {
+        "name": "Mapeo de la experiencia",
+        "score": 3.67,
+        "text": "El mapeo de la experiencia de técnicos agrícolas y productores reveló fricciones distintas para cada perfil. Haber distinguido desde el inicio que había dos usuarios con necesidades diferentes le dio mayor relevancia y profundidad a la solución propuesta."
+      },
+      {
+        "name": "Diseño de interfaces",
+        "score": 3.67,
+        "text": "Las interfaces del Marco Campo Claro —contadores de palabras, guías contextuales, alertas de comprensión— fueron una traducción creativa y pertinente de los hallazgos de investigación en componentes de diseño concretos."
+      },
+      {
+        "name": "Prototipado e iteración",
+        "score": 4,
+        "text": "El proceso de prototipado mostró iteraciones claras y una evolución documentada entre versiones. Las pruebas con cinco técnicos y cinco productores aportaron evidencia de mejora, aunque con la advertencia de que las conclusiones deben calibrarse al tamaño de la muestra."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 3.67,
+        "text": "La propuesta es factible para el contexto del IDEAM y deseable para los usuarios técnicos. La viabilidad en campo —zonas con señal deficiente, adopción real del flujo de WhatsApp— es el reto de escalamiento más importante para la siguiente fase."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 3.67,
+        "text": "Los indicadores de medición estuvieron presentes, pero la presentación de tasas de éxito del 100% con muestras pequeñas generó preguntas en el jurado. La calibración entre la contundencia de los datos y el alcance real de la muestra es clave en futuros reportes."
+      },
+      {
+        "name": "Comunicación oral",
+        "score": 3.67,
+        "text": "La presentación fue bien estructurada y Daniel hizo una introducción tranquila y confiada. La sesión de preguntas fue el momento más desafiante: el equipo estuvo titubeante y la respuesta respondió con justificaciones en lugar de conclusiones."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El proyecto consideró de forma explícita los impactos éticos del diseño: reducción de la brecha de comprensión entre el conocimiento técnico agroclimático y los productores rurales, con énfasis en la equidad de acceso a información que afecta sus decisiones productivas."
+      }
+    ],
+    "doc_criteria": [
+      {
+        "name": "Resumen ejecutivo",
+        "score": 3,
+        "text": "El resumen es adecuado y tiene buena estructura. Comunica el propósito y los hallazgos con claridad básica. Podría ganar en síntesis y en concreción de las recomendaciones para el lector que no conoce el proyecto."
+      },
+      {
+        "name": "Introducción",
+        "score": 3,
+        "text": "El contexto y los objetivos están presentados de forma adecuada. La relevancia del problema —la brecha entre el conocimiento técnico agroclimático y la comprensión del productor rural— podría destacarse con mayor contundencia."
+      },
+      {
+        "name": "Metodología",
+        "score": 3,
+        "text": "La metodología está descrita con claridad básica. Los roles del equipo y la justificación de las herramientas podrían detallarse más para reflejar el nivel de trabajo realizado durante las seis etapas de investigación."
+      },
+      {
+        "name": "Resultados y evidencia visual",
+        "score": 3,
+        "text": "Los hallazgos son comprensibles y están bien conectados con las decisiones de diseño. La evidencia visual es adecuada aunque podría profundizarse en el análisis de los resultados de las pruebas de comprensión."
+      },
+      {
+        "name": "Discusión y reflexión crítica",
+        "score": 4,
+        "text": "La discusión es honesta y analíticamente sólida. El reconocimiento de que el vocabulario contextualizado falló porque los usuarios no lo encontraban solos —y la decisión de cambiar el enfoque— es el tipo de reflexión crítica que eleva la calidad del reporte."
+      },
+      {
+        "name": "Conclusiones y recomendaciones",
+        "score": 3,
+        "text": "Las conclusiones son pertinentes y conectadas con los resultados. Se detecta una inconsistencia: se recomienda un checklist que bloquee la publicación, pero páginas antes se indica que ya fue implementado en el prototipo. Esta contradicción debe resolverse antes de la entrega definitiva."
+      },
+      {
+        "name": "Comunicación escrita",
+        "score": 4,
+        "text": "La redacción es clara, fluida y bien adaptada al contexto del proyecto. El tono es apropiado y la estructura es coherente. Muy pocos errores de estilo detectados a lo largo del documento."
+      },
+      {
+        "name": "Identificación de roles del equipo",
+        "score": 2,
+        "text": "La identificación de roles del equipo es superficial. Una descripción más detallada de cómo se distribuyó el trabajo entre los integrantes y cómo se tomaron las decisiones conjuntas fortalecería esta sección."
+      },
+      {
+        "name": "Referencias APA",
+        "score": 4,
+        "text": "Las referencias son pertinentes, actualizadas y están correctamente citadas en formato APA a lo largo del documento."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 3,
+        "text": "El proyecto considera los impactos éticos en relación con la equidad de acceso a información agroclimática. Esta dimensión podría desarrollarse con mayor profundidad, especialmente en lo relacionado con los riesgos de dependencia tecnológica en comunidades rurales."
+      }
+    ],
+    "tutor_criteria": [
+      {
+        "name": "Identifica el problema y actores",
+        "score": 4,
+        "text": "El tutor reconoce que el equipo identificó el problema correcto —el proceso de producción del boletín, no el boletín final— y documentó esa decisión con rigor metodológico. Esa capacidad de redirigir el foco es una fortaleza profesional clave."
+      },
+      {
+        "name": "Mapea la experiencia",
+        "score": 4,
+        "text": "El mapeo de la experiencia de los dos perfiles de usuario (técnico agrícola y productor) fue completo y bien diferenciado. Los dolores identificados en cada etapa del proceso de producción y consumo son directamente trazables a las decisiones de diseño."
+      },
+      {
+        "name": "Diseña interfaces digitales",
+        "score": 4,
+        "text": "Las interfaces del Marco Campo Claro son coherentes visualmente y responden a decisiones de diseño bien fundamentadas en los hallazgos. La traducción de un framework conceptual en componentes de interfaz concretos es una contribución metodológica valiosa."
+      },
+      {
+        "name": "Prototipa soluciones",
+        "score": 4,
+        "text": "El proceso de prototipado mostró iteraciones documentadas y una evolución clara entre versiones. Las pruebas con usuarios de ambos perfiles aportaron evidencia de mejora en comprensión y usabilidad."
+      },
+      {
+        "name": "Generación de valor",
+        "score": 3,
+        "text": "La propuesta es factible y deseable para los usuarios. La viabilidad en contextos de campo —señal deficiente, adopción real del flujo en WhatsApp— es el reto de escalamiento más importante que el tutor señala para la siguiente fase."
+      },
+      {
+        "name": "Estrategia de medición",
+        "score": 4,
+        "text": "La estrategia de medición está presente y conectada con el problema. El tutor valora los indicadores propuestos, aunque señala que la calibración entre contundencia de los datos y tamaño de muestra debe ser más cuidadosa en la comunicación de resultados."
+      },
+      {
+        "name": "Comunicación oral del proceso",
+        "score": 3,
+        "text": "La comunicación oral del proceso fue adecuada en la presentación. La sesión de preguntas mostró oportunidad de mejora: el equipo respondió con justificaciones en lugar de conclusiones, lo que generó la sensación de que la pregunta no fue respondida directamente."
+      },
+      {
+        "name": "Ética e impactos del diseño",
+        "score": 4,
+        "text": "El tutor reconoce la consideración de impactos éticos en relación con la equidad de acceso a información agroclimática y la responsabilidad del diseño ante comunidades rurales con menor acceso tecnológico."
+      }
+    ]
+  }
+};
+
+function fmt(n){return parseFloat(n).toFixed(2);}
+
+function dotHTML(score,max){
+  var dots='';
+  var s=Math.round(score);
+  var cls=['','filled-1','filled-2','filled-3','filled-4'];
+  for(var i=1;i<=max;i++){
+    dots+='<span class="dot '+(i<=s?cls[s]:'')+'" title="'+score+'"></span>';
+  }
+  return dots;
+}
+
+function buildCriteria(criteria,max){
+  var html='';
+  criteria.forEach(function(c){
+    html+='<div class="criterion-row">';
+    html+='<div class="cr-top">';
+    html+='<span class="cr-name">'+c.name+'</span>';
+    html+='<span class="cr-dots">'+dotHTML(c.score,max)+'</span>';
+    html+='<span class="cr-score">'+fmt(c.score)+' / '+max+'</span>';
+    html+='</div>';
+    html+='<p class="cr-text">'+c.text+'</p>';
+    html+='</div>';
+  });
+  return html;
+}
+
+function buildRubricBlock(title, avgLabel, avgVal, criteria, max){
+  var avg=fmt(avgVal);
+  var html='<div class="rubric-wrap">';
+  html+='<div class="rubric-header" onclick="toggleRubric(this)">';
+  html+='<span class="rh-title">'+title+'</span>';
+  html+='<span class="rh-avg">Promedio: '+avg+'</span>';
+  html+='<span class="chevron">▼</span>';
+  html+='</div>';
+  html+='<div class="rubric-body">';
+  html+=buildCriteria(criteria,max);
+  html+='</div></div>';
+  return html;
+}
+
+function toggleRubric(el){
+  el.classList.toggle('open');
+}
+
+function buscarEstudiante(){
+  var cod=document.getElementById('codigo-input').value.trim().toUpperCase();
+  var est=estudiantes.find(function(e){return e.codigo.toUpperCase()===cod;});
+  var err=document.getElementById('error-msg');
+  if(!est){err.style.display='block';return;}
+  err.style.display='none';
+
+  var fb=feedbacks[est.proyecto]||{};
+  var rb=rubrics[est.proyecto]||{};
+
+  document.getElementById('r-nombre').textContent=est.nombre;
+  document.getElementById('r-proyecto').textContent=est.proyecto;
+  document.getElementById('r-nf').innerHTML=fmt(est.nf)+'<span> / 5.0</span>';
+
+  // Cards
+  document.getElementById('pf-val').textContent=fmt(est.pf);
+  document.getElementById('pf-aporte').textContent=fmt(est.pf*0.20/0.90);
+  document.getElementById('doc-val').textContent=fmt(est.doc);
+  document.getElementById('doc-aporte').textContent=fmt(est.doc*0.40/0.90);
+  document.getElementById('tutor-val').textContent=fmt(est.tutor);
+  document.getElementById('tutor-aporte').textContent=fmt(est.tutor*0.30/0.90);
+
+  // Feedback text blocks
+  document.getElementById('pf-jurados').textContent=fb.pf_jurados||'';
+  document.getElementById('pf-director').textContent=fb.pf_director||'';
+  document.getElementById('doc-logros').textContent=fb.doc_logros||'';
+  document.getElementById('doc-mejora').textContent=fb.doc_mejora||'';
+  document.getElementById('tutor-logros').textContent=fb.tutor_logros||'';
+  document.getElementById('tutor-mejora').textContent=fb.tutor_mejora||'';
+
+  // Rubric breakdown
+  if(rb.pf_criteria){
+    document.getElementById('pf-rubric').innerHTML=
+      buildRubricBlock('Desglose por criterio','',est.pf,rb.pf_criteria,4);
+  }
+  if(rb.doc_criteria){
+    document.getElementById('doc-rubric').innerHTML=
+      buildRubricBlock('Desglose por criterio','',est.doc,rb.doc_criteria,4);
+  }
+  if(rb.tutor_criteria){
+    document.getElementById('tutor-rubric').innerHTML=
+      buildRubricBlock('Desglose por criterio','',est.tutor,rb.tutor_criteria,4);
+  }
+
+  document.getElementById('login-view').style.display='none';
+  document.getElementById('result-view').style.display='block';
+  showTab('pf',document.querySelector('.tab-btn'));
+}
+
+function showTab(id,btn){
+  ['pf','doc','tutor'].forEach(function(t){
+    document.getElementById('tab-'+t).style.display=(t===id)?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+
+document.getElementById('codigo-input').addEventListener('keydown',function(e){
+  if(e.key==='Enter') buscarEstudiante();
+});
+
+</script>
+</body></html>
