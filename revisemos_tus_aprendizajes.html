@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<!--
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │ ¿DÓNDE PEGO EL ENLACE DE GOOGLE SHEETS?                               │
+  │ Busca en este archivo el bloque que dice "CONFIGURACIÓN" (dentro del  │
+  │ <script>, más abajo) y pega los dos enlaces CSV de tu hoja:           │
+  │   ind: "…"   (pestaña M1_Individual)                                  │
+  │   grp: "…"   (pestaña M1_Grupal)                                      │
+  │ Guía paso a paso en la pestaña "Leeme" del Excel Datos_artefacto_…    │
+  └───────────────────────────────────────────────────────────────────────┘
+-->
+<title>Revisemos tus aprendizajes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
+<style>
+/* Banda de marca con el buscador por cédula, resultado en dos bloques (grupo, individual) y nota del agente */
+:root{
+  --bg:#ffffff; --surface:#f4f4fb; --line:#dcdcee; --ink:#14142b; --muted:#555570;
+  --accent:#5454e9; --accent-ink:#ffffff; --accent-soft:#ebebfc;
+  --band:#5454e9; --band-ink:#ffffff; --warn:#8a4b00; --warn-bg:#fdf3e2;
+  --ease:cubic-bezier(0.23,1,0.32,1); --r:12px; --r-tag:6px;
+  --shadow:0 1px 2px rgba(40,40,120,.06), 0 14px 32px -16px rgba(40,40,140,.22);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101019; --surface:#171726; --line:#2c2c46; --ink:#ececf6; --muted:#a8a8c2;
+    --accent:#9c9cf7; --accent-ink:#101019; --accent-soft:#222240; --band:#4646d6;
+    --warn:#f0c27a; --warn-bg:#2a2212;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 32px -16px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101019; --surface:#171726; --line:#2c2c46; --ink:#ececf6; --muted:#a8a8c2;
+  --accent:#9c9cf7; --accent-ink:#101019; --accent-soft:#222240; --band:#4646d6;
+  --warn:#f0c27a; --warn-bg:#2a2212;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 32px -16px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:16px;line-height:1.6;min-height:100dvh;text-align:left;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+::selection{background:var(--accent);color:var(--accent-ink)}
+input,button{font:inherit;color:inherit;caret-color:var(--accent)}
+button{cursor:pointer}
+a{color:var(--accent);text-underline-offset:3px;overflow-wrap:anywhere}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:860px;margin:0 auto}
+.band{margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px));background:var(--band);color:var(--band-ink);position:relative;overflow:hidden}
+.band .wrap{position:relative;padding-block:24px 56px}
+.logo{display:block;height:26px;width:auto;color:#fff}
+.mark{position:absolute;right:-12%;top:8%;width:54%;color:#fff;opacity:.08;pointer-events:none}
+.mark svg{display:block;width:100%;height:auto}
+h1{font-size:clamp(2.2rem,6vw,3.6rem);line-height:1.04;letter-spacing:-.035em;font-weight:800;margin:44px 0 12px;max-width:14ch;text-wrap:balance}
+.lead{margin:0 0 26px;max-width:52ch;color:rgba(255,255,255,.95)}
+form{display:flex;gap:10px;flex-wrap:wrap;max-width:520px}
+label{flex-basis:100%;font-weight:600;font-size:.9rem}
+input[type=text]{flex:1 1 180px;min-width:0;padding:15px 18px;border:0;border-radius:var(--r);background:#fff;color:#14142b;font-size:1.25rem;letter-spacing:.3em;font-variant-numeric:tabular-nums;box-shadow:0 10px 30px -14px rgba(10,10,80,.5);transition:box-shadow 160ms var(--ease)}
+input[type=text]::placeholder{color:#6a6a86;letter-spacing:.05em;font-size:1rem;opacity:1}
+input[type=text]:focus{outline:none;box-shadow:0 0 0 4px rgba(255,255,255,.4),0 10px 30px -14px rgba(10,10,80,.5)}
+.go{border:0;border-radius:var(--r);background:#14142b;color:#fff;padding:15px 22px;font-weight:700;transition:transform 140ms var(--ease),opacity 160ms var(--ease)}
+.go:active{transform:scale(.97)}
+.go:disabled{opacity:.55;cursor:default}
+.band :focus-visible{outline-color:#fff}
+.hint{margin:12px 0 0;font-size:.85rem;color:rgba(255,255,255,.92);max-width:56ch}
+main{margin-top:-28px;position:relative;padding-bottom:56px}
+.note{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow)}
+.note h2{margin:0 0 6px;font-size:.95rem;font-weight:800}
+.note p{margin:0;color:var(--muted);font-size:.92rem;max-width:68ch}
+.status{margin:24px 0 0;padding:14px 18px;border-radius:var(--r);background:var(--accent-soft);font-size:.95rem}
+.status.warn{background:var(--warn-bg);color:var(--warn)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0}
+.tabs button{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:var(--r);padding:8px 16px;font-weight:700;font-size:.92rem;transition:background-color 160ms var(--ease),color 160ms var(--ease),transform 140ms var(--ease)}
+.tabs button:active{transform:scale(.97)}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+@media (hover:hover) and (pointer:fine){.tabs button[aria-selected="false"]:hover{background:var(--accent-soft)}}
+.res{margin-top:28px;display:grid;gap:22px}
+.card{border:1.5px solid var(--line);border-radius:var(--r);padding:24px 24px 20px;background:var(--bg)}
+.card h2{margin:0 0 4px;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+.card .who{margin:0 0 16px;color:var(--muted);font-size:.9rem}
+.card p.intro{margin:0 0 18px;max-width:68ch}
+.card h3{margin:20px 0 8px;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.card ul{margin:0;padding-left:1.2em;display:grid;gap:8px;max-width:68ch}
+.card li::marker{color:var(--accent)}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;background:var(--accent-soft);color:var(--accent);border-radius:var(--r-tag);padding:2px 8px}
+.nota{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;margin:2px 0 6px}
+.nota strong{font-size:clamp(2.6rem,9vw,3.6rem);line-height:1;font-weight:800;letter-spacing:-.03em;color:var(--accent);font-variant-numeric:tabular-nums}
+.nota span{color:var(--muted);font-weight:600}
+.how{margin:0 0 6px;color:var(--muted);font-size:.85rem;max-width:68ch}
+.card ul.crit{list-style:none;margin:14px 0 0;padding:0;gap:0;max-width:none}
+.crit li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 0;border-top:1px solid var(--line)}
+.crit li:first-child{border-top:0}
+.crit b{font-weight:700;font-size:.95rem}
+.crit .d{grid-column:1/-1;color:var(--muted);font-size:.88rem}
+.lv{justify-self:end;font-size:.78rem;font-weight:700;border-radius:var(--r-tag);padding:2px 9px;border:1.5px solid var(--line);white-space:nowrap}
+.lv.L{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.lv.D{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.lv.N,.lv.X{background:var(--bg);color:var(--muted)}
+.link{border:0;background:none;padding:6px 0;color:var(--accent);font-weight:700;font-size:.92rem;text-decoration:underline;text-underline-offset:3px;transition:opacity 160ms var(--ease)}
+.link:active{transform:scale(.98)}
+dialog#rb{width:min(920px,calc(100vw - 24px));max-height:calc(100dvh - 32px);padding:0;border:1.5px solid var(--line);border-radius:var(--r);background:var(--bg);color:var(--ink);box-shadow:0 30px 80px -20px rgba(10,10,60,.55);overflow:hidden}
+dialog#rb[open]{display:flex;flex-direction:column;animation:pop 200ms var(--ease)}
+dialog#rb::backdrop{background:rgba(12,12,40,.55)}
+@keyframes pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+.mh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 14px;border-bottom:1px solid var(--line)}
+.mh h2{margin:0;font-size:1.25rem;font-weight:800;letter-spacing:-.02em}
+.mh p{margin:4px 0 0;color:var(--muted);font-size:.88rem;max-width:62ch}
+.x{flex:none;border:1.5px solid var(--line);background:var(--bg);border-radius:var(--r);width:40px;height:40px;font-size:1.2rem;line-height:1;transition:transform 140ms var(--ease)}
+.x:active{transform:scale(.95)}
+.mb{overflow:auto;padding:6px 22px 22px;overscroll-behavior:contain}
+.scale{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0 4px}
+.scale div{border:1.5px solid var(--line);border-radius:var(--r);padding:10px 12px;font-size:.85rem;color:var(--muted)}
+.scale b{display:block;font-size:1.5rem;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2}
+.rule{margin:8px 0 0;color:var(--muted);font-size:.85rem;max-width:70ch}
+.rt{width:100%;border-collapse:separate;border-spacing:0;margin-top:14px;font-size:.88rem}
+.rt th,.rt td{text-align:left;vertical-align:top;padding:10px 12px;border-top:1px solid var(--line)}
+.rt thead th{border-top:0;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.rt tbody th{font-weight:700;width:20%}
+.rt td.me{background:var(--accent-soft);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.me-tag{display:block;font-size:.72rem;font-weight:800;color:var(--accent);margin-bottom:2px}
+@media (max-width:640px){
+  .rt thead{display:none}
+  .rt,.rt tbody,.rt tr,.rt th,.rt td{display:block;width:auto}
+  .rt tr{border-top:1px solid var(--line);padding:10px 0}
+  .rt th,.rt td{border:0;padding:4px 0}
+  .rt tbody th{width:auto;padding-bottom:6px}
+  .rt td::before{content:attr(data-l);display:block;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+  .rt td.me{padding:6px 10px;border-radius:8px}
+  .scale{gap:8px}.scale div{padding:8px 10px;font-size:.78rem}.scale b{font-size:1.25rem}
+}
+@media (max-width:520px){.card{padding:20px 16px 16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="wrap">
+    <div class="mark" aria-hidden="true"><svg role="img" aria-label="INNLAB" viewBox="0 0 1122.15 220.84" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> <g id="Capa_1"> <g> <g> <path d="M16.39,172.27V25.17h19.35v147.09h-19.35Z"/> <path d="M68.51,172.27V25.17h16.19l84.5,118.86-7.31.79V25.17h19.55v147.09h-16.19L81.15,52.62l6.71-.79v120.44h-19.35Z"/> <path d="M214.22,172.27V25.17h16.19l84.5,118.86-7.31.79V25.17h19.55v147.09h-16.19l-84.11-119.65,6.71-.79v120.44h-19.35Z"/> <path d="M359.93,172.27V25.17h19.35v129.32h64.56v17.77h-83.91Z"/> <path d="M451.34,172.27l52.72-147.09h22.9l52.72,147.09h-20.73l-12.04-34.55h-62.79l-12.04,34.55h-20.73ZM490.24,119.95h50.54l-28.04-80.75h5.53l-28.04,80.75Z"/> <path d="M598.24,172.27V25.17h61.8c8.82,0,16.42,1.58,22.8,4.74,6.38,3.16,11.32,7.6,14.81,13.33,3.49,5.73,5.23,12.54,5.23,20.43,0,7.24-1.88,13.79-5.63,19.65-3.75,5.86-9.25,10.43-16.49,13.72l-.2-7.31c6.32,2.37,11.55,5.5,15.7,9.38,4.15,3.88,7.27,8.36,9.38,13.43,2.1,5.07,3.16,10.43,3.16,16.09,0,13.56-4.34,24.22-13.03,31.99-8.69,7.77-20.53,11.65-35.54,11.65h-62ZM617.59,85.59h42.05c7.11,0,12.83-2.07,17.18-6.22,4.34-4.15,6.52-9.44,6.52-15.89s-2.17-11.85-6.52-15.4c-4.34-3.55-10.07-5.33-17.18-5.33h-42.05v42.84ZM617.59,154.5h43.44c8.55,0,15.4-2.3,20.53-6.91,5.13-4.61,7.7-10.86,7.7-18.76s-2.57-14.18-7.7-18.86c-5.13-4.67-11.98-7.01-20.53-7.01h-43.44v51.53Z"/> </g> <g> <path d="M831.6,94.37c-3.07,0-5.91-.55-8.49-1.66-2.59-1.11-4.85-2.68-6.77-4.7-1.93-2.02-3.42-4.4-4.47-7.12-1.05-2.72-1.58-5.7-1.58-8.93s.53-6.27,1.58-8.99c1.05-2.72,2.53-5.1,4.44-7.12,1.91-2.02,4.16-3.59,6.77-4.7,2.61-1.11,5.45-1.66,8.52-1.66s5.69.53,8.09,1.58,4.42,2.41,6.07,4.09c1.65,1.67,2.83,3.46,3.53,5.37l-5.25,2.39c-1.01-2.41-2.59-4.37-4.73-5.87-2.14-1.5-4.71-2.25-7.71-2.25s-5.73.72-8.09,2.16c-2.35,1.44-4.19,3.44-5.52,6.01-1.32,2.57-1.98,5.57-1.98,8.99s.66,6.36,1.98,8.93c1.32,2.57,3.16,4.57,5.52,6.01,2.35,1.44,5.05,2.16,8.09,2.16s5.57-.75,7.71-2.25c2.14-1.5,3.72-3.45,4.73-5.87l5.25,2.39c-.7,1.91-1.88,3.7-3.53,5.37-1.65,1.67-3.68,3.04-6.07,4.09s-5.09,1.58-8.09,1.58Z"/> <path d="M870.31,94.37c-3.04,0-5.74-.72-8.12-2.16-2.37-1.44-4.24-3.42-5.6-5.93-1.36-2.51-2.04-5.32-2.04-8.44s.67-5.96,2.01-8.41c1.34-2.45,3.17-4.39,5.49-5.81,2.32-1.42,4.91-2.13,7.79-2.13,2.33,0,4.41.42,6.22,1.26,1.81.84,3.35,1.97,4.61,3.39,1.26,1.42,2.24,3.04,2.92,4.85.68,1.81,1.02,3.69,1.02,5.63,0,.43-.03.91-.09,1.43s-.13,1.02-.21,1.49h-25.8v-4.67h22.65l-2.57,2.1c.35-2.02.16-3.83-.58-5.43-.74-1.59-1.83-2.86-3.27-3.79-1.44-.93-3.08-1.4-4.9-1.4s-3.5.47-5.02,1.4c-1.52.93-2.7,2.27-3.53,4-.84,1.73-1.18,3.79-1.02,6.16-.16,2.3.2,4.31,1.08,6.04.88,1.73,2.12,3.07,3.74,4.03,1.61.95,3.38,1.43,5.28,1.43,2.1,0,3.87-.49,5.31-1.46,1.44-.97,2.61-2.22,3.5-3.74l4.55,2.33c-.62,1.44-1.59,2.75-2.89,3.94-1.3,1.19-2.84,2.13-4.61,2.83-1.77.7-3.75,1.05-5.92,1.05Z"/> <path d="M891.67,93.67v-31.47h5.31v6.13l-.88-.53c.78-1.99,2.03-3.53,3.77-4.64,1.73-1.11,3.77-1.66,6.1-1.66s4.27.51,6.04,1.52c1.77,1.01,3.17,2.41,4.2,4.2s1.55,3.81,1.55,6.07v20.37h-5.49v-18.62c0-1.75-.31-3.23-.93-4.44-.62-1.21-1.51-2.15-2.66-2.83s-2.46-1.02-3.94-1.02-2.79.34-3.94,1.02c-1.15.68-2.05,1.63-2.71,2.86s-.99,2.7-.99,4.41v18.62h-5.43Z"/> <path d="M938.31,94.02c-3.08,0-5.44-.88-7.09-2.63-1.65-1.75-2.48-4.22-2.48-7.41v-16.58h-5.72v-5.2h1.17c1.4,0,2.51-.43,3.33-1.28.82-.86,1.23-1.99,1.23-3.39v-2.57h5.43v7.24h7.06v5.2h-7.06v16.4c0,1.05.16,1.97.5,2.74.33.78.88,1.39,1.66,1.84.78.45,1.81.67,3.09.67.27,0,.61-.02,1.02-.06s.79-.08,1.14-.12v4.79c-.51.12-1.07.2-1.69.26-.62.06-1.15.09-1.58.09Z"/> <path d="M948.65,93.67v-31.47h5.31v5.78l-.58-.82c.74-1.79,1.87-3.12,3.39-4s3.37-1.31,5.55-1.31h1.93v5.14h-2.74c-2.22,0-4.01.69-5.37,2.07-1.36,1.38-2.04,3.34-2.04,5.87v18.74h-5.43Z"/> <path d="M984.02,94.37c-3.04,0-5.78-.71-8.23-2.13-2.45-1.42-4.4-3.38-5.84-5.87-1.44-2.49-2.16-5.31-2.16-8.47s.71-5.95,2.13-8.41c1.42-2.45,3.36-4.4,5.81-5.84,2.45-1.44,5.21-2.16,8.29-2.16s5.78.71,8.23,2.13c2.45,1.42,4.39,3.36,5.81,5.81,1.42,2.45,2.13,5.27,2.13,8.46s-.74,6.02-2.22,8.49c-1.48,2.47-3.44,4.42-5.87,5.84-2.43,1.42-5.13,2.13-8.08,2.13ZM984.02,89.12c1.95,0,3.71-.49,5.28-1.46s2.82-2.32,3.74-4.03c.91-1.71,1.37-3.62,1.37-5.72s-.46-4.04-1.37-5.69-2.16-2.98-3.74-3.97-3.34-1.49-5.28-1.49-3.77.5-5.34,1.49-2.83,2.32-3.77,3.97-1.4,3.55-1.4,5.69.47,4.01,1.4,5.72c.93,1.71,2.19,3.06,3.77,4.03s3.36,1.46,5.34,1.46Z"/> <path d="M1031.66,94.37c-2.96,0-5.62-.72-7.97-2.16-2.36-1.44-4.21-3.41-5.58-5.9-1.36-2.49-2.04-5.27-2.04-8.35s.68-5.96,2.04-8.44c1.36-2.47,3.22-4.43,5.58-5.87,2.35-1.44,5.01-2.16,7.97-2.16,2.61,0,4.92.55,6.95,1.66,2.02,1.11,3.62,2.6,4.79,4.47l-.88,1.34v-19.5h5.49v44.19h-5.31v-6.71l.7.93c-1.09,2.06-2.68,3.66-4.76,4.79-2.08,1.13-4.41,1.69-6.98,1.69ZM1032.13,89.12c1.98,0,3.76-.49,5.31-1.46s2.79-2.31,3.71-4c.91-1.69,1.37-3.59,1.37-5.69s-.46-4.06-1.37-5.75c-.92-1.69-2.15-3.03-3.71-4-1.56-.97-3.33-1.46-5.31-1.46s-3.71.5-5.28,1.49-2.81,2.32-3.71,3.97c-.9,1.65-1.34,3.57-1.34,5.75s.45,4,1.34,5.69c.89,1.69,2.12,3.03,3.68,4s3.33,1.46,5.31,1.46Z"/> <path d="M1070.89,94.37c-3.04,0-5.74-.72-8.12-2.16-2.37-1.44-4.24-3.42-5.6-5.93-1.36-2.51-2.04-5.32-2.04-8.44s.67-5.96,2.01-8.41c1.34-2.45,3.17-4.39,5.49-5.81,2.32-1.42,4.91-2.13,7.79-2.13,2.33,0,4.41.42,6.22,1.26,1.81.84,3.35,1.97,4.61,3.39,1.26,1.42,2.24,3.04,2.92,4.85.68,1.81,1.02,3.69,1.02,5.63,0,.43-.03.91-.09,1.43s-.13,1.02-.21,1.49h-25.8v-4.67h22.65l-2.57,2.1c.35-2.02.16-3.83-.58-5.43-.74-1.59-1.83-2.86-3.27-3.79-1.44-.93-3.08-1.4-4.9-1.4s-3.5.47-5.02,1.4c-1.52.93-2.7,2.27-3.53,4-.84,1.73-1.18,3.79-1.02,6.16-.16,2.3.2,4.31,1.08,6.04.88,1.73,2.12,3.07,3.74,4.03,1.61.95,3.38,1.43,5.28,1.43,2.1,0,3.87-.49,5.31-1.46,1.44-.97,2.61-2.22,3.5-3.74l4.55,2.33c-.62,1.44-1.59,2.75-2.89,3.94-1.3,1.19-2.84,2.13-4.61,2.83-1.77.7-3.75,1.05-5.92,1.05Z"/> <path d="M811.58,163.73v-43.49h5.72v43.49h-5.72Z"/> <path d="M826.35,163.73v-31.47h5.31v6.13l-.88-.53c.78-1.99,2.03-3.53,3.77-4.64,1.73-1.11,3.77-1.66,6.1-1.66s4.27.51,6.04,1.52c1.77,1.01,3.17,2.41,4.2,4.2,1.03,1.79,1.55,3.81,1.55,6.07v20.37h-5.49v-18.62c0-1.75-.31-3.23-.93-4.44-.62-1.21-1.51-2.15-2.66-2.83-1.15-.68-2.46-1.02-3.94-1.02s-2.79.34-3.94,1.02c-1.15.68-2.05,1.63-2.71,2.86-.66,1.23-.99,2.7-.99,4.41v18.62h-5.43Z"/> <path d="M860.2,163.73v-31.47h5.31v6.13l-.88-.53c.78-1.99,2.03-3.53,3.77-4.64,1.73-1.11,3.77-1.66,6.1-1.66s4.27.51,6.04,1.52c1.77,1.01,3.17,2.41,4.2,4.2s1.55,3.81,1.55,6.07v20.37h-5.49v-18.62c0-1.75-.31-3.23-.93-4.44-.62-1.21-1.51-2.15-2.66-2.83s-2.46-1.02-3.94-1.02-2.79.34-3.94,1.02c-1.15.68-2.05,1.63-2.71,2.86-.66,1.23-.99,2.7-.99,4.41v18.62h-5.43Z"/> <path d="M909.01,164.43c-3.04,0-5.78-.71-8.23-2.13-2.45-1.42-4.4-3.38-5.84-5.87-1.44-2.49-2.16-5.31-2.16-8.47s.71-5.95,2.13-8.41,3.36-4.4,5.81-5.84c2.45-1.44,5.21-2.16,8.29-2.16s5.78.71,8.23,2.13c2.45,1.42,4.39,3.36,5.81,5.81,1.42,2.45,2.13,5.27,2.13,8.46s-.74,6.02-2.22,8.49c-1.48,2.47-3.43,4.42-5.87,5.84-2.43,1.42-5.13,2.13-8.09,2.13ZM909.01,159.17c1.95,0,3.71-.49,5.28-1.46s2.82-2.32,3.74-4.03c.91-1.71,1.37-3.62,1.37-5.72s-.46-4.04-1.37-5.69c-.92-1.65-2.16-2.98-3.74-3.97s-3.34-1.49-5.28-1.49-3.77.5-5.34,1.49-2.83,2.32-3.77,3.97-1.4,3.55-1.4,5.69.47,4.01,1.4,5.72c.93,1.71,2.19,3.06,3.77,4.03s3.36,1.46,5.34,1.46Z"/> <path d="M940.42,163.73l-12.32-31.47h6.07l9.87,26.62h-2.1l9.92-26.62h6.07l-12.38,31.47h-5.14Z"/> <path d="M970.83,164.43c-2.06,0-3.88-.38-5.46-1.14s-2.81-1.81-3.71-3.15c-.9-1.34-1.34-2.89-1.34-4.64s.36-3.18,1.08-4.52c.72-1.34,1.85-2.48,3.39-3.42,1.54-.93,3.47-1.6,5.81-1.99l11.68-1.93v4.55l-10.45,1.75c-2.02.35-3.49.99-4.41,1.93-.92.93-1.37,2.08-1.37,3.44,0,1.28.52,2.35,1.55,3.21s2.33,1.28,3.88,1.28c1.98,0,3.71-.42,5.17-1.26,1.46-.84,2.61-1.97,3.45-3.42.84-1.44,1.25-3.04,1.25-4.79v-8c0-1.71-.63-3.1-1.9-4.17-1.27-1.07-2.93-1.61-4.99-1.61-1.79,0-3.38.46-4.76,1.37-1.38.92-2.4,2.13-3.06,3.65l-4.73-2.45c.58-1.44,1.52-2.73,2.8-3.88,1.28-1.15,2.78-2.05,4.49-2.71s3.5-.99,5.37-.99c2.41,0,4.53.46,6.36,1.37,1.83.92,3.26,2.18,4.29,3.79,1.03,1.62,1.55,3.49,1.55,5.63v21.37h-5.31v-5.96l.99.35c-.66,1.25-1.56,2.33-2.69,3.27-1.13.93-2.45,1.67-3.97,2.22-1.52.54-3.17.82-4.96.82Z"/> <path d="M1009.77,164.43c-3.08,0-5.81-.72-8.2-2.16s-4.27-3.41-5.63-5.9c-1.36-2.49-2.04-5.29-2.04-8.41s.68-5.95,2.04-8.41c1.36-2.45,3.24-4.4,5.63-5.84,2.39-1.44,5.13-2.16,8.2-2.16,2.06,0,3.99.37,5.78,1.11,1.79.74,3.37,1.73,4.73,2.98,1.36,1.25,2.35,2.71,2.98,4.38l-4.85,2.34c-.74-1.63-1.87-2.97-3.38-4-1.52-1.03-3.27-1.55-5.25-1.55s-3.63.49-5.17,1.46c-1.54.97-2.75,2.3-3.65,3.97-.9,1.67-1.34,3.6-1.34,5.78s.45,4,1.34,5.69c.89,1.69,2.11,3.03,3.65,4s3.26,1.46,5.17,1.46,3.74-.52,5.25-1.55c1.52-1.03,2.65-2.4,3.38-4.12l4.85,2.45c-.62,1.63-1.62,3.08-2.98,4.35-1.36,1.26-2.94,2.27-4.73,3.01-1.79.74-3.72,1.11-5.78,1.11Z"/> <path d="M1030.38,127.24v-7.01h5.43v7.01h-5.43ZM1030.38,163.73v-31.47h5.43v31.47h-5.43Z"/> <path d="M1059.16,164.43c-3.04,0-5.78-.71-8.23-2.13-2.45-1.42-4.4-3.38-5.84-5.87-1.44-2.49-2.16-5.31-2.16-8.47s.71-5.95,2.13-8.41c1.42-2.45,3.36-4.4,5.81-5.84,2.45-1.44,5.21-2.16,8.29-2.16s5.78.71,8.23,2.13c2.45,1.42,4.39,3.36,5.81,5.81,1.42,2.45,2.13,5.27,2.13,8.46s-.74,6.02-2.22,8.49c-1.48,2.47-3.44,4.42-5.87,5.84-2.43,1.42-5.13,2.13-8.08,2.13ZM1059.16,159.17c1.95,0,3.71-.49,5.28-1.46s2.82-2.32,3.74-4.03c.91-1.71,1.37-3.62,1.37-5.72s-.46-4.04-1.37-5.69-2.16-2.98-3.74-3.97-3.34-1.49-5.28-1.49-3.77.5-5.34,1.49-2.83,2.32-3.77,3.97-1.4,3.55-1.4,5.69.47,4.01,1.4,5.72c.93,1.71,2.19,3.06,3.77,4.03s3.36,1.46,5.34,1.46ZM1056.41,126.36l4.61-9.22h7.36l-6.54,9.22h-5.43Z"/> <path d="M1082.39,163.73v-31.47h5.31v6.13l-.88-.53c.78-1.99,2.03-3.53,3.77-4.64,1.73-1.11,3.77-1.66,6.1-1.66s4.27.51,6.04,1.52c1.77,1.01,3.17,2.41,4.2,4.2s1.55,3.81,1.55,6.07v20.37h-5.49v-18.62c0-1.75-.31-3.23-.93-4.44-.62-1.21-1.51-2.15-2.66-2.83s-2.46-1.02-3.94-1.02-2.79.34-3.94,1.02c-1.15.68-2.05,1.63-2.71,2.86s-.99,2.7-.99,4.41v18.62h-5.43Z"/> </g> </g> </g> </svg></div>
+    <svg class="logo" role="img" aria-label="INNLAB" viewBox="0 0 1122.15 220.84" fill="currentColor" xmlns="http://www.w3.org/2000/svg"> <g id="Capa_1"> <g> <g> <path d="M16.39,172.27V25.17h19.35v147.09h-19.35Z"/> <path d="M68.51,172.27V25.17h16.19l84.5,118.86-7.31.79V25.17h19.55v147.09h-16.19L81.15,52.62l6.71-.79v120.44h-19.35Z"/> <path d="M214.22,172.27V25.17h16.19l84.5,118.86-7.31.79V25.17h19.55v147.09h-16.19l-84.11-119.65,6.71-.79v120.44h-19.35Z"/> <path d="M359.93,172.27V25.17h19.35v129.32h64.56v17.77h-83.91Z"/> <path d="M451.34,172.27l52.72-147.09h22.9l52.72,147.09h-20.73l-12.04-34.55h-62.79l-12.04,34.55h-20.73ZM490.24,119.95h50.54l-28.04-80.75h5.53l-28.04,80.75Z"/> <path d="M598.24,172.27V25.17h61.8c8.82,0,16.42,1.58,22.8,4.74,6.38,3.16,11.32,7.6,14.81,13.33,3.49,5.73,5.23,12.54,5.23,20.43,0,7.24-1.88,13.79-5.63,19.65-3.75,5.86-9.25,10.43-16.49,13.72l-.2-7.31c6.32,2.37,11.55,5.5,15.7,9.38,4.15,3.88,7.27,8.36,9.38,13.43,2.1,5.07,3.16,10.43,3.16,16.09,0,13.56-4.34,24.22-13.03,31.99-8.69,7.77-20.53,11.65-35.54,11.65h-62ZM617.59,85.59h42.05c7.11,0,12.83-2.07,17.18-6.22,4.34-4.15,6.52-9.44,6.52-15.89s-2.17-11.85-6.52-15.4c-4.34-3.55-10.07-5.33-17.18-5.33h-42.05v42.84ZM617.59,154.5h43.44c8.55,0,15.4-2.3,20.53-6.91,5.13-4.61,7.7-10.86,7.7-18.76s-2.57-14.18-7.7-18.86c-5.13-4.67-11.98-7.01-20.53-7.01h-43.44v51.53Z"/> </g> <g> <path d="M831.6,94.37c-3.07,0-5.91-.55-8.49-1.66-2.59-1.11-4.85-2.68-6.77-4.7-1.93-2.02-3.42-4.4-4.47-7.12-1.05-2.72-1.58-5.7-1.58-8.93s.53-6.27,1.58-8.99c1.05-2.72,2.53-5.1,4.44-7.12,1.91-2.02,4.16-3.59,6.77-4.7,2.61-1.11,5.45-1.66,8.52-1.66s5.69.53,8.09,1.58,4.42,2.41,6.07,4.09c1.65,1.67,2.83,3.46,3.53,5.37l-5.25,2.39c-1.01-2.41-2.59-4.37-4.73-5.87-2.14-1.5-4.71-2.25-7.71-2.25s-5.73.72-8.09,2.16c-2.35,1.44-4.19,3.44-5.52,6.01-1.32,2.57-1.98,5.57-1.98,8.99s.66,6.36,1.98,8.93c1.32,2.57,3.16,4.57,5.52,6.01,2.35,1.44,5.05,2.16,8.09,2.16s5.57-.75,7.71-2.25c2.14-1.5,3.72-3.45,4.73-5.87l5.25,2.39c-.7,1.91-1.88,3.7-3.53,5.37-1.65,1.67-3.68,3.04-6.07,4.09s-5.09,1.58-8.09,1.58Z"/> <path d="M870.31,94.37c-3.04,0-5.74-.72-8.12-2.16-2.37-1.44-4.24-3.42-5.6-5.93-1.36-2.51-2.04-5.32-2.04-8.44s.67-5.96,2.01-8.41c1.34-2.45,3.17-4.39,5.49-5.81,2.32-1.42,4.91-2.13,7.79-2.13,2.33,0,4.41.42,6.22,1.26,1.81.84,3.35,1.97,4.61,3.39,1.26,1.42,2.24,3.04,2.92,4.85.68,1.81,1.02,3.69,1.02,5.63,0,.43-.03.91-.09,1.43s-.13,1.02-.21,1.49h-25.8v-4.67h22.65l-2.57,2.1c.35-2.02.16-3.83-.58-5.43-.74-1.59-1.83-2.86-3.27-3.79-1.44-.93-3.08-1.4-4.9-1.4s-3.5.47-5.02,1.4c-1.52.93-2.7,2.27-3.53,4-.84,1.73-1.18,3.79-1.02,6.16-.16,2.3.2,4.31,1.08,6.04.88,1.73,2.12,3.07,3.74,4.03,1.61.95,3.38,1.43,5.28,1.43,2.1,0,3.87-.49,5.31-1.46,1.44-.97,2.61-2.22,3.5-3.74l4.55,2.33c-.62,1.44-1.59,2.75-2.89,3.94-1.3,1.19-2.84,2.13-4.61,2.83-1.77.7-3.75,1.05-5.92,1.05Z"/> <path d="M891.67,93.67v-31.47h5.31v6.13l-.88-.53c.78-1.99,2.03-3.53,3.77-4.64,1.73-1.11,3.77-1.66,6.1-1.66s4.27.51,6.04,1.52c1.77,1.01,3.17,2.41,4.2,4.2s1.55,3.81,1.55,6.07v20.37h-5.49v-18.62c0-1.75-.31-3.23-.93-4.44-.62-1.21-1.51-2.15-2.66-2.83s-2.46-1.02-3.94-1.02-2.79.34-3.94,1.02c-1.15.68-2.05,1.63-2.71,2.86s-.99,2.7-.99,4.41v18.62h-5.43Z"/> <path d="M938.31,94.02c-3.08,0-5.44-.88-7.09-2.63-1.65-1.75-2.48-4.22-2.48-7.41v-16.58h-5.72v-5.2h1.17c1.4,0,2.51-.43,3.33-1.28.82-.86,1.23-1.99,1.23-3.39v-2.57h5.43v7.24h7.06v5.2h-7.06v16.4c0,1.05.16,1.97.5,2.74.33.78.88,1.39,1.66,1.84.78.45,1.81.67,3.09.67.27,0,.61-.02,1.02-.06s.79-.08,1.14-.12v4.79c-.51.12-1.07.2-1.69.26-.62.06-1.15.09-1.58.09Z"/> <path d="M948.65,93.67v-31.47h5.31v5.78l-.58-.82c.74-1.79,1.87-3.12,3.39-4s3.37-1.31,5.55-1.31h1.93v5.14h-2.74c-2.22,0-4.01.69-5.37,2.07-1.36,1.38-2.04,3.34-2.04,5.87v18.74h-5.43Z"/> <path d="M984.02,94.37c-3.04,0-5.78-.71-8.23-2.13-2.45-1.42-4.4-3.38-5.84-5.87-1.44-2.49-2.16-5.31-2.16-8.47s.71-5.95,2.13-8.41c1.42-2.45,3.36-4.4,5.81-5.84,2.45-1.44,5.21-2.16,8.29-2.16s5.78.71,8.23,2.13c2.45,1.42,4.39,3.36,5.81,5.81,1.42,2.45,2.13,5.27,2.13,8.46s-.74,6.02-2.22,8.49c-1.48,2.47-3.44,4.42-5.87,5.84-2.43,1.42-5.13,2.13-8.08,2.13ZM984.02,89.12c1.95,0,3.71-.49,5.28-1.46s2.82-2.32,3.74-4.03c.91-1.71,1.37-3.62,1.37-5.72s-.46-4.04-1.37-5.69-2.16-2.98-3.74-3.97-3.34-1.49-5.28-1.49-3.77.5-5.34,1.49-2.83,2.32-3.77,3.97-1.4,3.55-1.4,5.69.47,4.01,1.4,5.72c.93,1.71,2.19,3.06,3.77,4.03s3.36,1.46,5.34,1.46Z"/> <path d="M1031.66,94.37c-2.96,0-5.62-.72-7.97-2.16-2.36-1.44-4.21-3.41-5.58-5.9-1.36-2.49-2.04-5.27-2.04-8.35s.68-5.96,2.04-8.44c1.36-2.47,3.22-4.43,5.58-5.87,2.35-1.44,5.01-2.16,7.97-2.16,2.61,0,4.92.55,6.95,1.66,2.02,1.11,3.62,2.6,4.79,4.47l-.88,1.34v-19.5h5.49v44.19h-5.31v-6.71l.7.93c-1.09,2.06-2.68,3.66-4.76,4.79-2.08,1.13-4.41,1.69-6.98,1.69ZM1032.13,89.12c1.98,0,3.76-.49,5.31-1.46s2.79-2.31,3.71-4c.91-1.69,1.37-3.59,1.37-5.69s-.46-4.06-1.37-5.75c-.92-1.69-2.15-3.03-3.71-4-1.56-.97-3.33-1.46-5.31-1.46s-3.71.5-5.28,1.49-2.81,2.32-3.71,3.97c-.9,1.65-1.34,3.57-1.34,5.75s.45,4,1.34,5.69c.89,1.69,2.12,3.03,3.68,4s3.33,1.46,5.31,1.46Z"/> <path d="M1070.89,94.37c-3.04,0-5.74-.72-8.12-2.16-2.37-1.44-4.24-3.42-5.6-5.93-1.36-2.51-2.04-5.32-2.04-8.44s.67-5.96,2.01-8.41c1.34-2.45,3.17-4.39,5.49-5.81,2.32-1.42,4.91-2.13,7.79-2.13,2.33,0,4.41.42,6.22,1.26,1.81.84,3.35,1.97,4.61,3.39,1.26,1.42,2.24,3.04,2.92,4.85.68,1.81,1.02,3.69,1.02,5.63,0,.43-.03.91-.09,1.43s-.13,1.02-.21,1.49h-25.8v-4.67h22.65l-2.57,2.1c.35-2.02.16-3.83-.58-5.43-.74-1.59-1.83-2.86-3.27-3.79-1.44-.93-3.08-1.4-4.9-1.4s-3.5.47-5.02,1.4c-1.52.93-2.7,2.27-3.53,4-.84,1.73-1.18,3.79-1.02,6.16-.16,2.3.2,4.31,1.08,6.04.88,1.73,2.12,3.07,3.74,4.03,1.61.95,3.38,1.43,5.28,1.43,2.1,0,3.87-.49,5.31-1.46,1.44-.97,2.61-2.22,3.5-3.74l4.55,2.33c-.62,1.44-1.59,2.75-2.89,3.94-1.3,1.19-2.84,2.13-4.61,2.83-1.77.7-3.75,1.05-5.92,1.05Z"/> <path d="M811.58,163.73v-43.49h5.72v43.49h-5.72Z"/> <path d="M826.35,163.73v-31.47h5.31v6.13l-.88-.53c.78-1.99,2.03-3.53,3.77-4.64,1.73-1.11,3.77-1.66,6.1-1.66s4.27.51,6.04,1.52c1.77,1.01,3.17,2.41,4.2,4.2,1.03,1.79,1.55,3.81,1.55,6.07v20.37h-5.49v-18.62c0-1.75-.31-3.23-.93-4.44-.62-1.21-1.51-2.15-2.66-2.83-1.15-.68-2.46-1.02-3.94-1.02s-2.79.34-3.94,1.02c-1.15.68-2.05,1.63-2.71,2.86-.66,1.23-.99,2.7-.99,4.41v18.62h-5.43Z"/> <path d="M860.2,163.73v-31.47h5.31v6.13l-.88-.53c.78-1.99,2.03-3.53,3.77-4.64,1.73-1.11,3.77-1.66,6.1-1.66s4.27.51,6.04,1.52c1.77,1.01,3.17,2.41,4.2,4.2s1.55,3.81,1.55,6.07v20.37h-5.49v-18.62c0-1.75-.31-3.23-.93-4.44-.62-1.21-1.51-2.15-2.66-2.83s-2.46-1.02-3.94-1.02-2.79.34-3.94,1.02c-1.15.68-2.05,1.63-2.71,2.86-.66,1.23-.99,2.7-.99,4.41v18.62h-5.43Z"/> <path d="M909.01,164.43c-3.04,0-5.78-.71-8.23-2.13-2.45-1.42-4.4-3.38-5.84-5.87-1.44-2.49-2.16-5.31-2.16-8.47s.71-5.95,2.13-8.41,3.36-4.4,5.81-5.84c2.45-1.44,5.21-2.16,8.29-2.16s5.78.71,8.23,2.13c2.45,1.42,4.39,3.36,5.81,5.81,1.42,2.45,2.13,5.27,2.13,8.46s-.74,6.02-2.22,8.49c-1.48,2.47-3.43,4.42-5.87,5.84-2.43,1.42-5.13,2.13-8.09,2.13ZM909.01,159.17c1.95,0,3.71-.49,5.28-1.46s2.82-2.32,3.74-4.03c.91-1.71,1.37-3.62,1.37-5.72s-.46-4.04-1.37-5.69c-.92-1.65-2.16-2.98-3.74-3.97s-3.34-1.49-5.28-1.49-3.77.5-5.34,1.49-2.83,2.32-3.77,3.97-1.4,3.55-1.4,5.69.47,4.01,1.4,5.72c.93,1.71,2.19,3.06,3.77,4.03s3.36,1.46,5.34,1.46Z"/> <path d="M940.42,163.73l-12.32-31.47h6.07l9.87,26.62h-2.1l9.92-26.62h6.07l-12.38,31.47h-5.14Z"/> <path d="M970.83,164.43c-2.06,0-3.88-.38-5.46-1.14s-2.81-1.81-3.71-3.15c-.9-1.34-1.34-2.89-1.34-4.64s.36-3.18,1.08-4.52c.72-1.34,1.85-2.48,3.39-3.42,1.54-.93,3.47-1.6,5.81-1.99l11.68-1.93v4.55l-10.45,1.75c-2.02.35-3.49.99-4.41,1.93-.92.93-1.37,2.08-1.37,3.44,0,1.28.52,2.35,1.55,3.21s2.33,1.28,3.88,1.28c1.98,0,3.71-.42,5.17-1.26,1.46-.84,2.61-1.97,3.45-3.42.84-1.44,1.25-3.04,1.25-4.79v-8c0-1.71-.63-3.1-1.9-4.17-1.27-1.07-2.93-1.61-4.99-1.61-1.79,0-3.38.46-4.76,1.37-1.38.92-2.4,2.13-3.06,3.65l-4.73-2.45c.58-1.44,1.52-2.73,2.8-3.88,1.28-1.15,2.78-2.05,4.49-2.71s3.5-.99,5.37-.99c2.41,0,4.53.46,6.36,1.37,1.83.92,3.26,2.18,4.29,3.79,1.03,1.62,1.55,3.49,1.55,5.63v21.37h-5.31v-5.96l.99.35c-.66,1.25-1.56,2.33-2.69,3.27-1.13.93-2.45,1.67-3.97,2.22-1.52.54-3.17.82-4.96.82Z"/> <path d="M1009.77,164.43c-3.08,0-5.81-.72-8.2-2.16s-4.27-3.41-5.63-5.9c-1.36-2.49-2.04-5.29-2.04-8.41s.68-5.95,2.04-8.41c1.36-2.45,3.24-4.4,5.63-5.84,2.39-1.44,5.13-2.16,8.2-2.16,2.06,0,3.99.37,5.78,1.11,1.79.74,3.37,1.73,4.73,2.98,1.36,1.25,2.35,2.71,2.98,4.38l-4.85,2.34c-.74-1.63-1.87-2.97-3.38-4-1.52-1.03-3.27-1.55-5.25-1.55s-3.63.49-5.17,1.46c-1.54.97-2.75,2.3-3.65,3.97-.9,1.67-1.34,3.6-1.34,5.78s.45,4,1.34,5.69c.89,1.69,2.11,3.03,3.65,4s3.26,1.46,5.17,1.46,3.74-.52,5.25-1.55c1.52-1.03,2.65-2.4,3.38-4.12l4.85,2.45c-.62,1.63-1.62,3.08-2.98,4.35-1.36,1.26-2.94,2.27-4.73,3.01-1.79.74-3.72,1.11-5.78,1.11Z"/> <path d="M1030.38,127.24v-7.01h5.43v7.01h-5.43ZM1030.38,163.73v-31.47h5.43v31.47h-5.43Z"/> <path d="M1059.16,164.43c-3.04,0-5.78-.71-8.23-2.13-2.45-1.42-4.4-3.38-5.84-5.87-1.44-2.49-2.16-5.31-2.16-8.47s.71-5.95,2.13-8.41c1.42-2.45,3.36-4.4,5.81-5.84,2.45-1.44,5.21-2.16,8.29-2.16s5.78.71,8.23,2.13c2.45,1.42,4.39,3.36,5.81,5.81,1.42,2.45,2.13,5.27,2.13,8.46s-.74,6.02-2.22,8.49c-1.48,2.47-3.44,4.42-5.87,5.84-2.43,1.42-5.13,2.13-8.08,2.13ZM1059.16,159.17c1.95,0,3.71-.49,5.28-1.46s2.82-2.32,3.74-4.03c.91-1.71,1.37-3.62,1.37-5.72s-.46-4.04-1.37-5.69-2.16-2.98-3.74-3.97-3.34-1.49-5.28-1.49-3.77.5-5.34,1.49-2.83,2.32-3.77,3.97-1.4,3.55-1.4,5.69.47,4.01,1.4,5.72c.93,1.71,2.19,3.06,3.77,4.03s3.36,1.46,5.34,1.46ZM1056.41,126.36l4.61-9.22h7.36l-6.54,9.22h-5.43Z"/> <path d="M1082.39,163.73v-31.47h5.31v6.13l-.88-.53c.78-1.99,2.03-3.53,3.77-4.64,1.73-1.11,3.77-1.66,6.1-1.66s4.27.51,6.04,1.52c1.77,1.01,3.17,2.41,4.2,4.2s1.55,3.81,1.55,6.07v20.37h-5.49v-18.62c0-1.75-.31-3.23-.93-4.44-.62-1.21-1.51-2.15-2.66-2.83s-2.46-1.02-3.94-1.02-2.79.34-3.94,1.02c-1.15.68-2.05,1.63-2.71,2.86s-.99,2.7-.99,4.41v18.62h-5.43Z"/> </g> </g> </g> </svg>
+    <h1>Revisemos tus aprendizajes</h1>
+    <p class="lead">Escribe los últimos 4 dígitos de tu cédula para ver el feedback de tu grupo y el tuyo.</p>
+    <form id="f" autocomplete="off">
+      <label for="ced">Últimos 4 dígitos de tu cédula</label>
+      <input id="ced" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" aria-describedby="hint" disabled>
+      <button class="go" id="go" type="submit" disabled>Ver mi feedback</button>
+    </form>
+    <p class="hint" id="hint">Solo guardamos esos 4 dígitos para encontrarte. Nunca el número completo.</p>
+  </div>
+</header>
+<div class="wrap">
+<main>
+  <section class="note" aria-labelledby="nt">
+    <h2 id="nt">Quién escribe este feedback</h2>
+    <p>Soy el agente de IA que revisa la entrega del Módulo 1. Fui entrenado por el equipo INNLAB para dar feedback alineado con el contenido del curso. Puedo equivocarme: si algo no coincide con lo que hiciste, cuéntaselo al equipo.</p>
+  </section>
+  <div id="tabs" class="tabs" role="tablist" aria-label="Módulo"></div>
+  <div id="status" class="status" role="status" aria-live="polite">Conectando con la base de datos…</div>
+  <div id="res" class="res"></div>
+</main>
+</div>
+<dialog id="rb" aria-labelledby="rbt"></dialog>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var st=$("status"),res=$("res"),inp=$("ced"),go=$("go"),form=$("f");
+  /* ═══════════════════════════ CONFIGURACIÓN ═══════════════════════════
+     AQUÍ PEGAS EL ENLACE DE GOOGLE SHEETS (es el único lugar que debes editar).
+     1) En tu hoja: Archivo > Compartir > Publicar en la Web.
+     2) Elige la pestaña M1_Individual, formato "Valores separados por comas (.csv)", Publicar y copia el enlace.
+     3) Pégalo entre las comillas de  ind:"" . Repite con la pestaña M1_Grupal para  grp:"" .
+     Si dejas ambos vacíos, la página lee la base de datos del artefacto dentro de Claude.
+     Para sumar el Módulo 2: copia el bloque {id:"m1",…} completo, cambia id, label y pega los enlaces de M2_Individual y M2_Grupal. */
+  var SHEETS_M1={
+    ind:"https://docs.google.com/spreadsheets/d/e/2PACX-1vS7YB9BQMYEltIXCDDwFsePwsZnqWktk-N_VxXm9UP3e97APhBaAFxbBPHbbK82CsxmjEjC6jU2p4Ss/pub?gid=0&single=true&output=csv",   /* ← PEGA AQUÍ el enlace CSV de la pestaña M1_Individual */
+    grp:"https://docs.google.com/spreadsheets/d/e/2PACX-1vS7YB9BQMYEltIXCDDwFsePwsZnqWktk-N_VxXm9UP3e97APhBaAFxbBPHbbK82CsxmjEjC6jU2p4Ss/pub?gid=496862042&single=true&output=csv"    /* ← PEGA AQUÍ el enlace CSV de la pestaña M1_Grupal */
+  };
+  /* ═════════════════════════════════════════════════════════════════════ */
+  var MODS=[{id:"m1",label:"Módulo 1",sheets:SHEETS_M1,ind:"fb_ind",grp:"fb_grp",pts:{L:5,D:4.1,N:3.2},crit:[{"k":"s1","t":"Filtro inicial (S1)","L":"Identifica con criterio cuál dimensión es más riesgosa, con justificación","D":"Nombra las 3 dimensiones sin justificar cuál pesa más","N":"No aplica el filtro o es genérico"},{"k":"s2","t":"Investigación (S2)","L":"Conversación real + pregunta JTBD clara y accionable","D":"Conversación real pero JTBD vaga","N":"No hay evidencia de conversación real"},{"k":"s3","t":"Síntesis (S3)","L":"Insight/HMW conectado directamente con S2","D":"Insight presente pero desconectado","N":"No hay síntesis, pasa directo a la solución"},{"k":"s4","t":"Construcción (S4)","L":"Nivel de fidelidad coherente con el riesgo a probar","D":"Construye algo, pero el nivel no corresponde","N":"No hay artefacto o es solo descrito"},{"k":"s5","t":"Validación (S5)","L":"Prueba real + SEQ + decisión justificada","D":"Prueba real pero decisión no se sostiene","N":"No valida, o decisión arbitraria"},{"k":"colab","t":"Colaboración asincrónica","L":"Aporte claro de los 3, cada uno construye sobre el anterior","D":"Aporte desigual, uno llevó la mayor carga","N":"Trabajo de una sola persona presentado como grupal"},{"k":"refl","t":"Reflexión individual","L":"Pensamiento crítico propio, no repetición de conceptos","D":"Reflexión presente pero superficial","N":"Respuestas genéricas"}]}];
+  var mod=MODS[0],lastCode=null;
+  var db=null,unI=null,unG=null,token=0,usingSheets=false;
+  function msg(t,warn){st.hidden=!t;st.textContent=t||"";st.className="status"+(warn?" warn":"")}
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+  function list(title,items){
+    if(!items||!items.length)return null;
+    var f=document.createDocumentFragment();f.appendChild(el("h3",null,title));
+    var ul=el("ul");items.forEach(function(x){ul.appendChild(el("li",null,x))});f.appendChild(ul);return f}
+  function links(items){
+    if(!items||!items.length)return null;
+    var f=document.createDocumentFragment();f.appendChild(el("h3",null,"Para repasar"));
+    var ul=el("ul");
+    items.forEach(function(x){
+      var li=el("li");
+      if(x.u&&/^https?:\/\//.test(x.u)){var a=el("a",null,x.t);a.href=x.u;a.target="_blank";a.rel="noopener noreferrer";li.appendChild(a)}
+      else li.textContent=x.t;
+      ul.appendChild(li)});
+    f.appendChild(ul);return f}
+  function card(id,title,who,d,fallback){
+    var c=el("article","card");c.id=id;c.appendChild(el("h2",null,title));
+    if(who)c.appendChild(el("p","who",who));
+    if(!d){c.appendChild(el("p","intro",fallback));return c}
+    c.appendChild(el("p","intro",d.intro||""));
+    [list("Para pensar",d.preguntas),list("Del módulo (S1 a S5)",d.practicas),links(d.links)].forEach(function(n){if(n)c.appendChild(n)});
+    return c}
+  var LVT={L:"Logrado",D:"En desarrollo",N:"No evidenciado",X:"No aplica"};
+  function rubric(d){
+    var c=el("article","card");c.id="cn";c.appendChild(el("h2",null,"Tu nota del Módulo 1"));
+    if(d.nota==null||!d.niveles){c.appendChild(el("p","intro","Todavía no tienes nota: no encontramos tu entrega del Módulo 1. Si ya la enviaste, avisa al equipo INNLAB."));return c}
+    var n=el("div","nota");n.appendChild(el("strong",null,Number(d.nota).toFixed(1).replace(".",",")));n.appendChild(el("span",null,"de 5"));c.appendChild(n);
+    c.appendChild(el("p","how","Se calcula con la rúbrica del módulo: Logrado vale 5,0, En desarrollo 4,1 y No evidenciado 3,2, y se promedian los criterios que te aplican. La nota más baja posible es 3,2."));
+    var rbtn=el("button","link","Ver la rúbrica completa");rbtn.type="button";rbtn.addEventListener("click",function(){openRubric(d)});c.appendChild(rbtn);
+    var ul=el("ul","crit");
+    mod.crit.forEach(function(k){
+      var v=d.niveles[k.k];if(!v)return;
+      var li=el("li");li.appendChild(el("b",null,k.t));li.appendChild(el("span","lv "+v,LVT[v]));
+      li.appendChild(el("span","d",v==="X"?"Trabajaste solo: este criterio no se califica.":k[v]));ul.appendChild(li)});
+    c.appendChild(ul);return c}
+  var dlg=$("rb"),lastFocus=null;
+  function fmt(x){return String(x).replace(".",",")}
+  function openRubric(d){
+    var P=mod.pts,mine=(d&&d.niveles)||{};
+    dlg.textContent="";
+    var h=el("div","mh"),hh=el("div");var t=el("h2",null,"Rúbrica del "+mod.label.charAt(0).toLowerCase()+mod.label.slice(1));t.id="rbt";hh.appendChild(t);
+    hh.appendChild(el("p",null,"Así se evalúa cada criterio. Tu nivel aparece resaltado."));h.appendChild(hh);
+    var x=el("button","x","×");x.type="button";x.setAttribute("aria-label","Cerrar la rúbrica");x.addEventListener("click",function(){dlg.close()});h.appendChild(x);dlg.appendChild(h);
+    var b=el("div","mb");
+    var sc=el("div","scale");
+    [["L","Logrado"],["D","En desarrollo"],["N","No evidenciado"]].forEach(function(a){var c=el("div");c.appendChild(el("b",null,fmt(P[a[0]].toFixed(1))));c.appendChild(document.createTextNode(a[1]));sc.appendChild(c)});
+    b.appendChild(sc);
+    b.appendChild(el("p","rule","La nota es el promedio de los criterios que te aplican y va de 3,2 a 5,0. Si trabajaste solo, Colaboración asincrónica no se califica y no entra al promedio."));
+    var tb=el("table","rt"),th=el("thead"),tr=el("tr");
+    ["Criterio","Logrado","En desarrollo","No evidenciado"].forEach(function(n){tr.appendChild(el("th",null,n))});th.appendChild(tr);tb.appendChild(th);
+    var bd=el("tbody");
+    mod.crit.forEach(function(k){
+      var r=el("tr"),c0=el("th",null,k.t);c0.scope="row";r.appendChild(c0);
+      [["L","Logrado"],["D","En desarrollo"],["N","No evidenciado"]].forEach(function(a){
+        var c=el("td",mine[k.k]===a[0]?"me":null);c.setAttribute("data-l",a[1]);
+        if(mine[k.k]===a[0])c.appendChild(el("span","me-tag","Tu nivel"));
+        c.appendChild(document.createTextNode(k[a[0]]));r.appendChild(c)});
+      bd.appendChild(r);
+      if(mine[k.k]==="X"){var n=el("tr"),c1=el("td","me","Trabajaste solo: este criterio no se califica.");c1.colSpan=4;n.appendChild(c1);bd.appendChild(n)}
+    });
+    tb.appendChild(bd);b.appendChild(tb);dlg.appendChild(b);
+    lastFocus=document.activeElement;
+    if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");
+    x.focus();
+  }
+  dlg.addEventListener("click",function(e){if(e.target===dlg)dlg.close()});
+  dlg.addEventListener("close",function(){if(lastFocus&&lastFocus.focus)lastFocus.focus()});
+  function stop(){if(unI){unI();unI=null}if(unG){unG();unG=null}}
+  var ind=null,grp=null,gid=null,have=false,gl=false;
+  function paint(){
+    res.textContent="";
+    if(!have)return;
+    if(!ind){msg("No encontramos esos 4 dígitos. Revisa que sean los últimos de tu cédula. Si es correcto y no aparece tu feedback, escribe al equipo INNLAB.",true);return}
+    msg("");
+    var who=null;
+    if(gid&&grp&&grp.miembros)who="Equipo: "+grp.miembros.join(", ");
+    res.appendChild(rubric(ind));res.appendChild(card("cg",gid&&grp?("Feedback de tu grupo: "+grp.nombre):"Feedback de tu grupo",who,gid?grp:null,(gid&&!gl)?"Cargando el feedback de tu grupo…":"No encontramos un grupo asociado a tu cédula en el formulario grupal. Si trabajaste con un equipo, pide a quien envió el formulario que revise que tu nombre esté incluido. Si trabajaste solo, avísanos."));
+    res.appendChild(card("ci","Tu feedback individual","Hola, "+ind.nombre+".",ind,""));
+  }
+  function look(code){
+    stop();ind=null;grp=null;gid=null;have=false;gl=false;res.textContent="";
+    lastCode=code;var my=++token;msg("Buscando…");
+    var t=setTimeout(function(){if(my===token&&!have)msg(usingSheets?"La hoja de Google Sheets no respondió. Revisa tu conexión e inténtalo de nuevo.":"No logramos conectar con la base de datos. Revisa tu conexión e inténtalo de nuevo.",true)},10000);
+    unI=db.doc(mod.ind+"/"+code).onSnapshot(function(s){
+      if(my!==token)return;clearTimeout(t);
+      ind=s.exists?s.data():null;have=true;
+      var ng=ind&&ind.gid?ind.gid:null;
+      if(ng!==gid||!unG){
+        if(unG){unG();unG=null}
+        gid=ng;grp=null;gl=false;
+        if(gid){unG=db.doc(mod.grp+"/"+gid).onSnapshot(function(g){if(my!==token)return;grp=g.exists?g.data():null;gl=true;paint()},function(){if(my===token){grp=null;gl=true;paint()}})}
+      }
+      paint();
+    },function(e){if(my===token){clearTimeout(t);msg(usingSheets?"No pudimos leer la hoja de Google Sheets ("+((e&&e.message)||"error de red")+"). Revisa que los enlaces CSV estén publicados y, si abres el archivo desde tu computador, ábrelo desde un servidor local o un hosting.":"No pudimos leer el feedback. Abre esta página con tu cuenta de Claude e inténtalo de nuevo.",true)}});
+  }
+  form.addEventListener("submit",function(e){
+    e.preventDefault();
+    var v=inp.value.trim();
+    if(!/^\d{4}$/.test(v)){msg("Escribe exactamente 4 dígitos.",true);return}
+    look(v)});
+  inp.addEventListener("input",function(){inp.value=inp.value.replace(/\D/g,"").slice(0,4)});
+  function ready(d){db=d;inp.disabled=false;go.disabled=false;msg("Escribe tus 4 dígitos para empezar.")}
+  var tabsEl=$("tabs");
+  function drawTabs(){
+    tabsEl.textContent="";
+    MODS.forEach(function(m){
+      var b=el("button",null,m.label);b.type="button";b.setAttribute("role","tab");b.setAttribute("aria-selected",m===mod?"true":"false");
+      b.addEventListener("click",function(){if(m===mod)return;mod=m;drawTabs();if(db&&lastCode)look(lastCode);else{stop();res.textContent=""}});
+      tabsEl.appendChild(b)})}
+  drawTabs();
+  /* ---- Lectura desde Google Sheets (CSV publicado) ---- */
+  function parseCSV(t){
+    var rows=[],r=[],f="",q=false,i=0,c;
+    t=t.replace(/^\uFEFF/,"");
+    for(;i<t.length;i++){c=t[i];
+      if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+      else if(c==='"')q=true;
+      else if(c===","){r.push(f);f=""}
+      else if(c==="\n"||c==="\r"){if(c==="\r"&&t[i+1]==="\n")i++;r.push(f);f="";rows.push(r);r=[]}
+      else f+=c}
+    if(f!==""||r.length){r.push(f);rows.push(r)}
+    return rows}
+  function norm(h){return String(h||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"")}
+  function lines(v){return String(v||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean)}
+  function toLinks(v){return lines(v).map(function(l){var i=l.lastIndexOf("|");if(i<0)return {t:l};var u=l.slice(i+1).trim();return /^https?:\/\//.test(u)?{t:l.slice(0,i).trim(),u:u}:{t:l}})}
+  var LVW={logrado:"L",endesarrollo:"D",noevidenciado:"N",noaplica:"X",l:"L",d:"D",n:"N",x:"X"};
+  function computeNota(v,P){var xs=[];Object.keys(v).forEach(function(k){if(P[v[k]]!=null)xs.push(P[v[k]])});return xs.length?Math.round(xs.reduce(function(a,b){return a+b},0)/xs.length*10)/10:null}
+  function rowsToMap(rows,kind,mod){
+    var out={};if(!rows.length)return out;
+    var H=rows[0].map(norm),ix=function(n){return H.indexOf(n)};
+    rows.slice(1).forEach(function(r){
+      function g(n){var i=ix(n);return i<0?"":(r[i]||"").trim()}
+      if(kind==="ind"){
+        var id=g("cedula4").replace(/\D/g,"");if(!id)return;id=("0000"+id).slice(-4);
+        var niv={},any=false;["s1","s2","s3","s4","s5","colab","refl"].forEach(function(k){var v=LVW[norm(g(k))];if(v){niv[k]=v;any=true}});
+        var nota=parseFloat(g("nota").replace(",","."));
+        if(isNaN(nota))nota=any?computeNota(niv,mod.pts):null;
+        out[id]={nombre:g("nombre"),gid:g("grupo")||null,intro:g("intro"),preguntas:lines(g("preguntas")),practicas:lines(g("practicas")),links:toLinks(g("links")),nota:any?nota:null,niveles:any?niv:null}}
+      else{
+        var gid=g("grupo");if(!gid)return;
+        out[gid]={nombre:g("nombre"),miembros:g("miembros").split(/[\n\r;]+/).map(function(x){return x.trim()}).filter(Boolean),intro:g("intro"),preguntas:lines(g("preguntas")),practicas:lines(g("practicas")),links:toLinks(g("links"))}}
+    });
+    return out}
+  function sheetsAdapter(){
+    function load(coll){
+      var m=MODS.filter(function(x){return x.ind===coll||x.grp===coll})[0],kind=m.ind===coll?"ind":"grp",url=m.sheets[kind];
+      return fetch(url+(url.indexOf("?")>-1?"&":"?")+"_="+Date.now()).then(function(r){if(!r.ok)throw new Error("la hoja respondió HTTP "+r.status);return r.text()}).then(function(t){if(/^\s*</.test(t))throw new Error("el enlace devolvió una página web y no un CSV: publica la pestaña con formato CSV");var rows=parseCSV(t);if(rows.length&&norm(rows[0][0])!==(kind==="ind"?"cedula4":"grupo"))throw new Error("la primera columna debería llamarse "+(kind==="ind"?"cedula4":"grupo")+" (pestaña equivocada)");return rowsToMap(rows,kind,m)})}
+    return {doc:function(path){var p=path.split("/");return {onSnapshot:function(ok,bad){
+      var alive=true;
+      function tick(){load(p[0]).then(function(map){if(!alive)return;var v=map[p[1]];ok({exists:!!v,data:function(){return v}})},function(e){if(alive){console.error("Sheets:",e);bad(e)}})}
+      tick();var iv=setInterval(tick,60000);
+      return function(){alive=false;clearInterval(iv)}}}}}}
+  var done=false;
+  if(MODS.some(function(m){return m.sheets&&m.sheets.ind&&m.sheets.grp})){
+    done=true;usingSheets=true;db=sheetsAdapter();ready(db);return}
+  setTimeout(function(){if(!done)msg("Esta página necesita tu cuenta de Claude para leer el feedback. Ábrela con la sesión iniciada.",true)},10000);
+  if(window.claude&&window.claude.use){
+    window.claude.use("db").then(function(d){done=true;if(d)ready(d);else msg("Esta página necesita tu cuenta de Claude para leer el feedback. Ábrela con la sesión iniciada.",true)},function(){done=true;msg("No pudimos conectar con la base de datos.",true)});
+  }else{done=true;msg("Falta conectar la hoja de Google Sheets: pega los enlaces en el bloque CONFIGURACIÓN del archivo HTML.",true)}
+})();
+</script>
+</body>
+</html>
